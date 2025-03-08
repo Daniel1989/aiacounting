@@ -1,0 +1,39 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "loginToAccount": "Login to your account",
+    "createAccount": "Create a new account",
+    "alreadyHaveAccount": "Already have an account? Login",
+    "dontHaveAccount": "Don't have an account? Register",
+    "minPasswordLength": "At least 6 characters",
+    "yourPassword": "Your password",
+    "processing": "Processing...",
+    "termsAgreement": "By logging in, you agree to our Terms of Service and Privacy Policy",
+    "emailVerified": "Email verified",
+    "emailNotVerified": "Email not verified",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailAlreadyInUse": "Email already in use",
+      "weakPassword": "Password is too weak",
+      "genericError": "Authentication failed, please try again"
+    },
+    "success": {
+      "registrationSuccess": "Registration successful! Please check your email to verify your account.",
+      "loginSuccess": "Login successful!",
+      "logoutSuccess": "Logged out successfully"
+    }
+  },
+  "qrCode": {
+    "scanToAccess": "Please scan the QR code below with your mobile phone to access this page",
+    "scanToVisit": "Scan to visit"
+  }
+} 

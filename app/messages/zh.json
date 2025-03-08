@@ -1,0 +1,39 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出登录",
+    "email": "邮箱",
+    "password": "密码",
+    "loginToAccount": "登录您的账号",
+    "createAccount": "创建一个新账号",
+    "alreadyHaveAccount": "已有账号？点击登录",
+    "dontHaveAccount": "没有账号？点击注册",
+    "minPasswordLength": "至少6个字符",
+    "yourPassword": "您的密码",
+    "processing": "处理中...",
+    "termsAgreement": "登录即表示您同意我们的服务条款和隐私政策",
+    "emailVerified": "已验证邮箱",
+    "emailNotVerified": "邮箱未验证",
+    "errors": {
+      "invalidCredentials": "邮箱或密码不正确",
+      "emailAlreadyInUse": "该邮箱已被注册",
+      "weakPassword": "密码强度不足",
+      "genericError": "认证失败，请重试"
+    },
+    "success": {
+      "registrationSuccess": "注册成功！请检查您的邮箱以验证账号。",
+      "loginSuccess": "登录成功！",
+      "logoutSuccess": "已成功退出登录"
+    }
+  },
+  "qrCode": {
+    "scanToAccess": "请使用手机扫描下面的二维码访问此页面",
+    "scanToVisit": "扫描访问"
+  }
+} 
