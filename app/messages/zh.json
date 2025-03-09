@@ -34,8 +34,38 @@
     "success": {
       "registrationSuccess": "注册成功！请检查您的邮箱以验证账号。",
       "loginSuccess": "登录成功！",
-      "logoutSuccess": "已成功退出登录"
+      "logoutSuccess": "已成功退出登录",
+      "redirecting": "正在跳转到您的账户..."
     }
+  },
+  "home": {
+    "today": "今日",
+    "todayExpenses": "今日支出",
+    "income": "收入",
+    "expenses": "支出",
+    "addRecord": "记一笔",
+    "showRecentRecords": "展示近期账单",
+    "noRecords": "暂无记录",
+    "loading": "加载记录中...",
+    "pleaseLogin": "请登录查看您的记录",
+    "login": "登录",
+    "unnamed": "未命名"
+  },
+  "records": {
+    "addRecord": "记一笔",
+    "expense": "支出",
+    "income": "收入",
+    "amount": "金额",
+    "selectTag": "选择分类",
+    "note": "备注（可选）",
+    "notePlaceholder": "输入记录备注",
+    "save": "保存记录",
+    "pleaseLogin": "请登录后添加记录",
+    "login": "登录",
+    "errorFetchingTags": "获取分类失败",
+    "errorAddingRecord": "添加记录失败",
+    "invalidAmount": "请输入有效金额",
+    "notLoggedIn": "您必须登录才能添加记录"
   },
   "qrCode": {
     "scanToAccess": "请使用手机扫描下面的二维码访问此页面",

@@ -2,14 +2,31 @@ import { createClient } from '@/app/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { syncUser } from '@/app/lib/supabase/database';
 
-export async function GET(request: NextRequest, { params }: { params: { locale: string } }) {
+interface CallbackParams {
+  params: Promise<{ locale: string }>;
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: CallbackParams
+) {
+  // In Next.js 15, we need to await the params
+  const { locale } = await params;
+  
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const locale = params.locale;
   
   if (code) {
     const supabase = createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    
+    // Exchange the code for a session
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (error) {
+      console.error('Error exchanging code for session:', error);
+      // If there's an error, redirect to login page
+      return NextResponse.redirect(new URL(`/${locale}/login`, requestUrl.origin));
+    }
     
     // Get the user data after authentication
     const { data: { user } } = await supabase.auth.getUser();

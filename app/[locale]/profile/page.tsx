@@ -1,17 +1,19 @@
 import { UserProfile } from '@/app/components/auth/user-profile';
 import { LogoutButton } from '@/app/components/auth/logout-button';
-import { useTranslations } from 'next-intl';
-import { unstable_setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 
 interface ProfilePageProps {
-  params: {
-    locale: string;
-  };
+  params: Promise<{ locale: string }>;
 }
 
-export default function ProfilePage({ params: { locale } }: ProfilePageProps) {
+export default async function ProfilePage({ params }: ProfilePageProps) {
+  // In Next.js 15, we need to await the params
+  const { locale } = await params;
+  
   unstable_setRequestLocale(locale);
-  const t = useTranslations('auth');
+  
+  // Use getTranslations instead of useTranslations for server components
+  const t = await getTranslations('auth');
 
   return (
     <div className="container mx-auto px-4 py-8">

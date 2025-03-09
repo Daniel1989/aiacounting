@@ -34,8 +34,38 @@
     "success": {
       "registrationSuccess": "Registration successful! Please check your email to verify your account.",
       "loginSuccess": "Login successful!",
-      "logoutSuccess": "Logged out successfully"
+      "logoutSuccess": "Logged out successfully",
+      "redirecting": "You will be redirected to your account shortly..."
     }
+  },
+  "home": {
+    "today": "TODAY",
+    "todayExpenses": "Today's Expenses",
+    "income": "Income",
+    "expenses": "Expenses",
+    "addRecord": "Add Record",
+    "showRecentRecords": "Show Recent Records",
+    "noRecords": "No records found",
+    "loading": "Loading records...",
+    "pleaseLogin": "Please log in to view your records",
+    "login": "Login",
+    "unnamed": "Unnamed"
+  },
+  "records": {
+    "addRecord": "Add Record",
+    "expense": "Expense",
+    "income": "Income",
+    "amount": "Amount",
+    "selectTag": "Select Category",
+    "note": "Note (Optional)",
+    "notePlaceholder": "Enter a note for this record",
+    "save": "Save Record",
+    "pleaseLogin": "Please log in to add records",
+    "login": "Login",
+    "errorFetchingTags": "Error fetching categories",
+    "errorAddingRecord": "Error adding record",
+    "invalidAmount": "Please enter a valid amount",
+    "notLoggedIn": "You must be logged in to add records"
   },
   "qrCode": {
     "scanToAccess": "Please scan the QR code below with your mobile phone to access this page",

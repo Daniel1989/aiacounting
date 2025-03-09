@@ -6,9 +6,23 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   
+  // Try to determine the locale from the referrer or default to 'en'
+  const referrer = request.headers.get('referer') || '';
+  const referrerUrl = new URL(referrer || requestUrl.origin);
+  const localePath = referrerUrl.pathname.split('/')[1];
+  const locale = ['en', 'zh'].includes(localePath) ? localePath : 'en';
+  
   if (code) {
     const supabase = createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    
+    // Exchange the code for a session
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (error) {
+      console.error('Error exchanging code for session:', error);
+      // If there's an error, redirect to login page
+      return NextResponse.redirect(new URL(`/${locale}/login`, requestUrl.origin));
+    }
     
     // Get the user data after authentication
     const { data: { user } } = await supabase.auth.getUser();
@@ -28,5 +42,6 @@ export async function GET(request: NextRequest) {
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(requestUrl.origin);
+  // Use the detected locale for the redirect
+  return NextResponse.redirect(new URL(`/${locale}`, requestUrl.origin));
 } 

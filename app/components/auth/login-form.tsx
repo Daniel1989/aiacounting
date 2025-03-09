@@ -15,6 +15,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [loginSuccess, setLoginSuccess] = useState(false);
   
   const router = useRouter();
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export function LoginForm() {
     setIsLoading(true);
     setError(null);
     setMessage(null);
+    setLoginSuccess(false);
 
     try {
       if (mode === 'login') {
@@ -41,9 +43,14 @@ export function LoginForm() {
           throw error;
         }
         
+        // Show success message but don't redirect immediately
         setMessage(t('success.loginSuccess'));
-        router.push(`/${locale}`);
-        router.refresh();
+        setLoginSuccess(true);
+        
+        // Wait a moment to let the session be established
+        setTimeout(() => {
+          router.refresh();
+        }, 1000);
       } else {
         // For registration, use the non-localized callback route
         // This is because the email link will not have the locale information
@@ -78,7 +85,21 @@ export function LoginForm() {
     setMode(mode === 'login' ? 'register' : 'login');
     setError(null);
     setMessage(null);
+    setLoginSuccess(false);
   };
+
+  // If login was successful, show a more prominent success message
+  if (loginSuccess) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="p-6 bg-green-50 border border-green-200 rounded-lg text-center">
+          <h2 className="text-xl font-bold text-green-700 mb-2">{t('success.loginSuccess')}</h2>
+          <p className="mb-4">{t('success.redirecting')}</p>
+          <div className="animate-spin h-8 w-8 border-4 border-green-500 rounded-full border-t-transparent mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">
