@@ -4,7 +4,7 @@ import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import { locales } from '../../config';
-import { Navigation } from '@/app/components/navigation';
+import { Nav } from '@/app/components/nav';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Accounting",
   description: "Mobile-first accounting application",
+  themeColor: "#ffffff",
 };
 
 export function generateStaticParams() {
@@ -43,16 +44,16 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className="light">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="flex flex-col min-h-screen">
-            <Navigation locale={locale} />
-            <main className="flex-grow">
+            <main className="flex-grow pb-16">
               {children}
             </main>
+            <Nav locale={locale} />
           </div>
         </NextIntlClientProvider>
       </body>

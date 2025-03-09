@@ -38,6 +38,11 @@
       "redirecting": "You will be redirected to your account shortly..."
     }
   },
+  "nav": {
+    "today": "Today",
+    "addRecord": "Add Record",
+    "statistics": "Statistics"
+  },
   "home": {
     "today": "TODAY",
     "todayExpenses": "Today's Expenses",

@@ -38,6 +38,11 @@
       "redirecting": "正在跳转到您的账户..."
     }
   },
+  "nav": {
+    "today": "今日",
+    "addRecord": "记账",
+    "statistics": "统计"
+  },
   "home": {
     "today": "今日",
     "todayExpenses": "今日支出",
