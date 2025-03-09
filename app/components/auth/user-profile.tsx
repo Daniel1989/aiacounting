@@ -2,55 +2,65 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/app/lib/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { DbUser } from '@/app/lib/supabase/database';
 
 export function UserProfile() {
   const t = useTranslations('auth');
   const commonT = useTranslations('common');
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<DbUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const supabase = createClient();
-  const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    let isMounted = true;
+    
+    async function fetchUser() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        if (!isMounted) return;
+        
+        // First check if the user is authenticated with Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          if (isMounted) setUser(null);
+          return;
+        }
+        
+        // Fetch the user from our database using a fetch request to our API
+        const response = await fetch('/api/user');
+        
+        if (response.ok) {
+          const userData = await response.json();
+          if (isMounted) setUser(userData);
+        } else {
+          console.error('Failed to fetch user data');
+          if (isMounted) setUser(null);
+        }
       } catch (error) {
         console.error('Error fetching user:', error);
+        if (isMounted) setUser(null);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setLoading(false);
       }
-    };
-
-    fetchUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [supabase.auth]);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      router.push('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
-  };
+    
+    fetchUser();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      fetchUser();
+    });
+    
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center p-4">
+      <div className="p-4 flex justify-center">
         <div className="animate-pulse">{commonT('loading')}</div>
       </div>
     );
@@ -58,34 +68,34 @@ export function UserProfile() {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center p-4">
-        <button
-          onClick={() => router.push('/login')}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"
-        >
-          {t('login')}
-        </button>
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+        {t('notLoggedIn')}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm">
-      <div className="text-center mb-4">
-        <h3 className="font-medium text-lg">
-          {user.email}
-        </h3>
-        <p className="text-sm text-gray-500">
-          {user.email_confirmed_at ? t('emailVerified') : t('emailNotVerified')}
-        </p>
-      </div>
+    <div className="p-6 bg-white border rounded-lg shadow-sm">
+      <h2 className="text-xl font-semibold mb-4">{t('profile')}</h2>
       
-      <button
-        onClick={handleLogout}
-        className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md"
-      >
-        {t('logout')}
-      </button>
+      <div className="space-y-3">
+        <div>
+          <p className="text-sm text-gray-500">{t('email')}</p>
+          <p className="font-medium">{user.email}</p>
+        </div>
+        
+        <div>
+          <p className="text-sm text-gray-500">{t('username')}</p>
+          <p className="font-medium">{user.username}</p>
+        </div>
+        
+        <div>
+          <p className="text-sm text-gray-500">{t('memberSince')}</p>
+          <p className="font-medium">
+            {new Date(user.created_at).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
     </div>
   );
 } 

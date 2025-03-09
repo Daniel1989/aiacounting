@@ -2,7 +2,8 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "home": "Home"
   },
   "auth": {
     "login": "Login",
@@ -20,6 +21,10 @@
     "termsAgreement": "By logging in, you agree to our Terms of Service and Privacy Policy",
     "emailVerified": "Email verified",
     "emailNotVerified": "Email not verified",
+    "profile": "User Profile",
+    "username": "Username",
+    "memberSince": "Member Since",
+    "notLoggedIn": "You are not logged in. Please log in to view your profile.",
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "emailAlreadyInUse": "Email already in use",

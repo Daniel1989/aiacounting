@@ -4,6 +4,7 @@ import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import { locales } from '../../config';
+import { Navigation } from '@/app/components/navigation';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +48,12 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <Navigation locale={locale} />
+            <main className="flex-grow">
+              {children}
+            </main>
+          </div>
         </NextIntlClientProvider>
       </body>
     </html>

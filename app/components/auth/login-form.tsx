@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/app/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 type AuthMode = 'login' | 'register';
@@ -17,6 +17,8 @@ export function LoginForm() {
   const [message, setMessage] = useState<string | null>(null);
   
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1]; // Extract locale from pathname
   const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,9 +42,11 @@ export function LoginForm() {
         }
         
         setMessage(t('success.loginSuccess'));
-        router.push('/');
+        router.push(`/${locale}`);
         router.refresh();
       } else {
+        // For registration, use the non-localized callback route
+        // This is because the email link will not have the locale information
         const { error } = await supabase.auth.signUp({
           email,
           password,

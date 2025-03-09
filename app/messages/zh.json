@@ -2,7 +2,8 @@
   "common": {
     "loading": "加载中...",
     "error": "错误",
-    "success": "成功"
+    "success": "成功",
+    "home": "首页"
   },
   "auth": {
     "login": "登录",
@@ -20,6 +21,10 @@
     "termsAgreement": "登录即表示您同意我们的服务条款和隐私政策",
     "emailVerified": "已验证邮箱",
     "emailNotVerified": "邮箱未验证",
+    "profile": "用户资料",
+    "username": "用户名",
+    "memberSince": "注册时间",
+    "notLoggedIn": "您尚未登录。请登录以查看您的个人资料。",
     "errors": {
       "invalidCredentials": "邮箱或密码不正确",
       "emailAlreadyInUse": "该邮箱已被注册",
