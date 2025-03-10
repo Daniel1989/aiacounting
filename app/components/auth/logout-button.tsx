@@ -1,36 +1,58 @@
 'use client';
 
-import { createClient } from '@/app/lib/supabase/auth';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { createClient } from '@/app/lib/supabase/client';
+import { LogOut } from 'lucide-react';
 
-export function LogoutButton() {
+interface LogoutButtonProps {
+  className?: string;
+  variant?: 'default' | 'danger';
+}
+
+export function LogoutButton({ 
+  className = '', 
+  variant = 'default' 
+}: LogoutButtonProps) {
   const t = useTranslations('auth');
   const router = useRouter();
-  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
-
+  
   const handleLogout = async () => {
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
+      const supabase = createClient();
       await supabase.auth.signOut();
-      router.push('/');
+      
+      // Refresh the page to update the UI
       router.refresh();
+      
+      // Redirect to home page
+      router.push('/');
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  const baseClasses = 'flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium transition-colors';
+  
+  const variantClasses = variant === 'danger'
+    ? 'bg-red-500 hover:bg-red-600 text-white'
+    : 'bg-gray-100 hover:bg-gray-200 text-gray-800';
+  
   return (
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors"
+      className={`${baseClasses} ${variantClasses} ${className}`}
+      aria-label={t('logout')}
     >
-      {isLoading ? t('processing') : t('logout')}
+      <LogOut className="w-4 h-4" />
+      <span>{isLoading ? t('processing') : t('logout')}</span>
     </button>
   );
 } 

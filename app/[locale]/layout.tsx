@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider } from 'next-intl';
@@ -19,7 +19,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Accounting",
   description: "Mobile-first accounting application",
+};
+
+export const viewport: Viewport = {
   themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export function generateStaticParams() {
