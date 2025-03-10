@@ -1,6 +1,6 @@
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/app/lib/server';
-import { AddRecordForm } from '@/app/components/records/add-record-form';
+import { MoneyForm } from '@/app/components/records/money-form';
 
 interface NewRecordPageProps {
   params: Promise<{ locale: string }>;
@@ -22,9 +22,9 @@ export default async function NewRecordPage({ params }: NewRecordPageProps) {
   const userId = user?.id || null;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{t('addRecord')}</h1>
-      <AddRecordForm userId={userId} />
+    <div className="h-full flex flex-col">
+      <h1 className="sr-only">{t('addRecord')}</h1>
+      <MoneyForm userId={userId} />
     </div>
   );
 } 

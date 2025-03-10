@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import { locales } from '../../config';
 import { Nav } from '@/app/components/nav';
+import { Toaster } from 'sonner';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,7 @@ export default async function RootLayout({
             </main>
             <Nav locale={locale} />
           </div>
+          <Toaster position="top-center" richColors />
         </NextIntlClientProvider>
       </body>
     </html>
