@@ -7,7 +7,11 @@ import { useTranslations } from 'next-intl';
 
 type AuthMode = 'login' | 'register';
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string;
+}
+
+export function LoginForm({ redirectTo }: LoginFormProps) {
   const t = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +35,8 @@ export function LoginForm() {
 
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({
+        // Sign in with password
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -43,14 +48,25 @@ export function LoginForm() {
           throw error;
         }
         
-        // Show success message but don't redirect immediately
+        if (!data.session) {
+          throw new Error('No session returned after login');
+        }
+        
+        // Show success message
         setMessage(t('success.loginSuccess'));
         setLoginSuccess(true);
-        
+        console.log('Login successful');
         // Wait a moment to let the session be established
         setTimeout(() => {
-          router.refresh();
-        }, 1000);
+          // Refresh to ensure the session is properly loaded
+          console.log('Refreshing...');
+          // Redirect to the specified URL or home page
+          if (redirectTo) {
+            router.push(redirectTo);
+          } else {
+            router.push(`/${locale}`);
+          }
+        }, 2000);
       } else {
         // For registration, use the non-localized callback route
         // This is because the email link will not have the locale information
@@ -75,6 +91,7 @@ export function LoginForm() {
         setMode('login');
       }
     } catch (error: any) {
+      console.error('Login error:', error);
       setError(error.message || t('errors.genericError'));
     } finally {
       setIsLoading(false);

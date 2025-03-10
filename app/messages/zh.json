@@ -41,7 +41,8 @@
   "nav": {
     "today": "今日",
     "addRecord": "记账",
-    "statistics": "统计"
+    "statistics": "统计",
+    "settings": "设置"
   },
   "home": {
     "today": "今日",
@@ -75,5 +76,24 @@
   "qrCode": {
     "scanToAccess": "请使用手机扫描下面的二维码访问此页面",
     "scanToVisit": "扫描访问"
+  },
+  "settings": {
+    "settings": "设置",
+    "profile": "用户资料",
+    "legal": "法律信息",
+    "username": "用户名",
+    "usernamePlaceholder": "请输入您的用户名",
+    "saveChanges": "保存更改",
+    "profileUpdated": "资料更新成功",
+    "updateError": "更新资料失败",
+    "usernameRequired": "用户名为必填项",
+    "notLoggedIn": "您必须登录才能更新资料",
+    "termsOfService": "服务条款",
+    "termsDescription": "阅读我们的使用条款和条件",
+    "privacyPolicy": "隐私政策",
+    "privacyDescription": "了解我们如何收集和使用您的数据",
+    "cookiePolicy": "Cookie 政策",
+    "cookieDescription": "关于我们如何在网站上使用 Cookie 的信息",
+    "legalDescription": "请查看我们的法律文件，了解有关您的权利和责任的重要信息。"
   }
 } 

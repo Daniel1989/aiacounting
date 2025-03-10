@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/app/lib/supabase/auth';
 import { useTranslations } from 'next-intl';
 import { DbUser } from '@/app/lib/supabase/database';
 

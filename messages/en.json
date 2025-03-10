@@ -1,0 +1,25 @@
+{
+  "nav": {
+    "settings": "Settings",
+    "statistics": "Statistics"
+  },
+  "settings": {
+    "settings": "Settings",
+    "profile": "User Profile",
+    "legal": "Legal Information",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "saveChanges": "Save Changes",
+    "profileUpdated": "Profile updated successfully",
+    "updateError": "Failed to update profile",
+    "usernameRequired": "Username is required",
+    "notLoggedIn": "You must be logged in to update your profile",
+    "termsOfService": "Terms of Service",
+    "termsDescription": "Read our terms and conditions of use",
+    "privacyPolicy": "Privacy Policy",
+    "privacyDescription": "Learn how we collect and use your data",
+    "cookiePolicy": "Cookie Policy",
+    "cookieDescription": "Information about how we use cookies on our site",
+    "legalDescription": "Please review our legal documents for important information about your rights and responsibilities."
+  }
+} 

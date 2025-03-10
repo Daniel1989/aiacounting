@@ -1,6 +1,6 @@
 'use client';
 
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/app/lib/supabase/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';

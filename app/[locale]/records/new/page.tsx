@@ -1,5 +1,5 @@
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
-import { getCurrentUser } from '@/app/lib/auth';
+import { getCurrentUser } from '@/app/lib/server';
 import { AddRecordForm } from '@/app/components/records/add-record-form';
 
 interface NewRecordPageProps {

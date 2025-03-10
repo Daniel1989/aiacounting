@@ -16,44 +16,20 @@ export async function getUserBySupabaseId(supabaseId: string): Promise<DbUser | 
     return null;
   }
 
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('auth_id', supabaseId)
-    .single();
+  try {
+    const supabase = await createClient();
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('auth_id', supabaseId)
+      .single();
 
-  if (error || !data) {
-    console.error('Error fetching user by Supabase ID:', error);
+    return existingUser as DbUser;
+  } catch (error) {
+    console.error('Error in getUserBySupabaseId:', error);
     return null;
   }
-
-  return data as DbUser;
 }
-
-/**
- * Gets a user from Supabase by their email
- */
-export async function getUserByEmail(email: string): Promise<DbUser | null> {
-  if (!email) {
-    return null;
-  }
-
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
-
-  if (error || !data) {
-    console.error('Error fetching user by email:', error);
-    return null;
-  }
-
-  return data as DbUser;
-}
-
 /**
  * Syncs a user from Supabase auth to the users table
  * If the user doesn't exist, it creates a new user record
@@ -64,38 +40,43 @@ export async function syncUser(authUser: { id: string; email: string }): Promise
     throw new Error('Invalid user data provided');
   }
 
-  const supabase = createClient();
+  try {
+    const supabase = await createClient();
 
-  // Check if user already exists in our database
-  const { data: existingUser, error: fetchError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('auth_id', authUser.id)
-    .single();
+    // Check if user already exists in our database
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('auth_id', authUser.id)
+      .single();
 
-  // If user exists, return it
-  if (existingUser && !fetchError) {
-    return existingUser as DbUser;
-  }
+    // If user exists, return it
+    if (existingUser && !fetchError) {
+      return existingUser as DbUser;
+    }
 
-  // If user doesn't exist, create a new user
-  // Default username to the user's email
-  const { data: newUser, error: insertError } = await supabase
-    .from('users')
-    .insert([
-      {
-        auth_id: authUser.id,
-        email: authUser.email,
-        username: authUser.email, // Default username to email
-      }
-    ])
-    .select()
-    .single();
+    // If user doesn't exist, create a new user
+    // Default username to the user's email
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert([
+        {
+          auth_id: authUser.id,
+          email: authUser.email,
+          username: authUser.email, // Default username to email
+        }
+      ])
+      .select()
+      .single();
 
-  if (insertError || !newUser) {
-    console.error('Error creating user:', insertError);
+    if (insertError || !newUser) {
+      console.error('Error creating user:', insertError);
+      return null;
+    }
+
+    return newUser as DbUser;
+  } catch (error) {
+    console.error('Error in syncUser:', error);
     return null;
   }
-
-  return newUser as DbUser;
 } 
