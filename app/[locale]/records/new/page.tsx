@@ -22,7 +22,7 @@ export default async function NewRecordPage({ params }: NewRecordPageProps) {
   const userId = user?.id || null;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-[calc(100vh-56px)] flex flex-col overflow-hidden">
       <h1 className="sr-only">{t('addRecord')}</h1>
       <MoneyForm userId={userId} />
     </div>

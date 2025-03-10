@@ -63,7 +63,6 @@ export function MoneyForm({ userId }: MoneyFormProps) {
       } else {
         // Filter out tags whose icon names don't exist in iconFileMap
         const validTags = data?.filter(tag => {
-          console.log(tag.icon, iconFileMap[tag.icon]);
           // Check if the icon name exists in the mapping or is a valid file name itself
           return iconFileMap[tag.icon] !== undefined || 
                  Object.values(iconFileMap).includes(tag.icon);
@@ -164,31 +163,38 @@ export function MoneyForm({ userId }: MoneyFormProps) {
   }
   
   return (
-    <div className="flex flex-col h-full">
-      <header className="relative flex items-center justify-center px-5 py-2.5 min-h-[58px] text-xl">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Fixed header */}
+      <header className="sticky top-0 z-10 bg-white flex items-center justify-center px-5 py-2.5 min-h-[58px] text-xl shadow-sm">
         <div className="flex-1 text-left font-bold ml-2.5">{t('addRecord')}</div>
         <div className="flex-none text-right">
           <CategorySection value={category} onChange={setCategory} />
         </div>
       </header>
       
-      <TagsSection
-        value={formData.tagId}
-        category={category}
-        tags={tags}
-        onChange={(tagId) => handleChange({ tagId })}
-      />
+      {/* Scrollable tags section with calculated height to fit within viewport */}
+      <div className="flex-1 overflow-auto pb-4">
+        <TagsSection
+          value={formData.tagId}
+          category={category}
+          tags={tags}
+          onChange={(tagId) => handleChange({ tagId })}
+        />
+      </div>
       
-      <NoteSection
-        value={formData.note}
-        onChange={(note) => handleChange({ note })}
-      />
-      
-      <NumberPadSection
-        value={formData.amount}
-        onChange={(amount) => handleChange({ amount })}
-        onSave={saveRecord}
-      />
+      {/* Fixed bottom sections */}
+      <div className="sticky bottom-0 left-0 right-0 z-10 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <NoteSection
+          value={formData.note}
+          onChange={(note) => handleChange({ note })}
+        />
+        
+        <NumberPadSection
+          value={formData.amount}
+          onChange={(amount) => handleChange({ amount })}
+          onSave={saveRecord}
+        />
+      </div>
     </div>
   );
 } 

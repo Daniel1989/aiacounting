@@ -34,7 +34,7 @@ export function TagsSection({ value, category, tags, onChange }: TagsSectionProp
   };
 
   return (
-    <section className="flex-grow flex flex-col overflow-auto bg-[#f9faf5] p-4 pb-3">
+    <section className="bg-[#f9faf5] p-4 pb-3">
       <ul className="flex flex-wrap justify-start">
         {filteredTags.map(tag => (
           <li 
