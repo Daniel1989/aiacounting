@@ -51,5 +51,30 @@
     "logoutDescription": "Sign out of your account",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "tags": {
+    "addNewTag": "Add New Tag",
+    "back": "Back",
+    "save": "Save",
+    "enterTagName": "Enter tag name (max 4 chars)",
+    "expenses": "Expenses",
+    "income": "Income",
+    "existingTags": "Existing Tags",
+    "noTagsInCategory": "No tags in this category",
+    "selectIcon": "Select Icon",
+    "household": "Household",
+    "food": "Food",
+    "transport": "Transport",
+    "shopping": "Shopping",
+    "entertainment": "Entertainment",
+    "finance": "Finance",
+    "other": "Other",
+    "tagNameRequired": "Tag name is required",
+    "tagNameTooLong": "Tag name cannot exceed 4 characters",
+    "tagAdded": "Tag added successfully",
+    "errorSavingTag": "Failed to save tag",
+    "errorFetchingTags": "Failed to fetch tags",
+    "notLoggedIn": "You must be logged in to add tags",
+    "loading": "Loading..."
   }
 } 

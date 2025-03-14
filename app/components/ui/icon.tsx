@@ -120,8 +120,11 @@ export function Icon({ name, className, size = 40 }: IconProps) {
     if (!fileName) {
       return null;
     }
+    
+    const isIconOnly = className?.includes('icon-only');
+    
     return (
-      <div className="flex items-center flex-col">
+      <div className={cn("flex items-center", isIconOnly ? "" : "flex-col")}>
         <Image
           src={`/icons/tags/${fileName}.svg`}
           alt={tagName}
@@ -132,9 +135,8 @@ export function Icon({ name, className, size = 40 }: IconProps) {
             console.error(`Error loading icon for ${tagName}:`, e);
           }}
         />
-        <span className="text-xs">{tagName}</span>
+        {!isIconOnly && <span className="text-xs">{tagName}</span>}
       </div>
-
     );
   }
   return null;

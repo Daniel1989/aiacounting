@@ -98,5 +98,30 @@
     "cookiePolicy": "Cookie Policy",
     "cookieDescription": "Information about how we use cookies on our site",
     "legalDescription": "Please review our legal documents for important information about your rights and responsibilities."
+  },
+  "tags": {
+    "addNewTag": "Add New Tag",
+    "back": "Back",
+    "save": "Save",
+    "enterTagName": "Enter tag name (max 4 chars)",
+    "expenses": "Expenses",
+    "income": "Income",
+    "existingTags": "Existing Tags",
+    "noTagsInCategory": "No tags in this category",
+    "selectIcon": "Select Icon",
+    "household": "Household",
+    "food": "Food",
+    "transport": "Transport",
+    "shopping": "Shopping",
+    "entertainment": "Entertainment",
+    "finance": "Finance",
+    "other": "Other",
+    "tagNameRequired": "Tag name is required",
+    "tagNameTooLong": "Tag name cannot exceed 4 characters",
+    "tagAdded": "Tag added successfully",
+    "errorSavingTag": "Failed to save tag",
+    "errorFetchingTags": "Failed to fetch tags",
+    "notLoggedIn": "You must be logged in to add tags",
+    "loading": "Loading..."
   }
 } 

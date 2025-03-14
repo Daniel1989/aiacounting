@@ -51,7 +51,7 @@ export function TagsSection({ value, category, tags, onChange }: TagsSectionProp
         ))}
         <li className="w-[calc(20%-8px)] m-1 mt-1 p-2 rounded-lg flex flex-col items-center justify-start text-sm text-center">
           <Link 
-            href={`/${locale}/tags/add`}
+            href={`/${locale}/tags/new`}
             className="w-10 h-10 flex items-center justify-center text-2xl mb-1 text-[#f2c841]"
           >
             +

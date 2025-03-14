@@ -98,5 +98,30 @@
     "cookiePolicy": "Cookie 政策",
     "cookieDescription": "关于我们如何在网站上使用 Cookie 的信息",
     "legalDescription": "请查看我们的法律文件，了解有关您的权利和责任的重要信息。"
+  },
+  "tags": {
+    "addNewTag": "添加新标签",
+    "back": "返回",
+    "save": "保存",
+    "enterTagName": "输入标签名称（最多4个字符）",
+    "expenses": "支出",
+    "income": "收入",
+    "existingTags": "现有标签",
+    "noTagsInCategory": "此类别中没有标签",
+    "selectIcon": "选择图标",
+    "household": "家居",
+    "food": "食品",
+    "transport": "交通",
+    "shopping": "购物",
+    "entertainment": "娱乐",
+    "finance": "金融",
+    "other": "其他",
+    "tagNameRequired": "标签名称为必填项",
+    "tagNameTooLong": "标签名称不能超过4个字符",
+    "tagAdded": "标签添加成功",
+    "errorSavingTag": "保存标签失败",
+    "errorFetchingTags": "获取标签失败",
+    "notLoggedIn": "您必须登录才能添加标签",
+    "loading": "加载中..."
   }
 } 

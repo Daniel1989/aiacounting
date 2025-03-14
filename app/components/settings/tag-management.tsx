@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/app/lib/supabase/client';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 // Default tag names for filtering
 const DEFAULT_COST_TAGS = ['房租', '水电', '交通', '学校', '日用', '餐饮', '购物', '娱乐', '旅游', '电影', '宠物'];
@@ -295,22 +296,20 @@ export function TagManagement({ userId, locale }: TagManagementProps) {
         </div>
       </div>
       
-      {/* Add new tag button */}
-      {!editingTag && (
-        <button
-          onClick={handleAddNew}
-          className="mt-4 flex items-center justify-center w-full py-2 px-4 bg-emerald-50 text-emerald-700 rounded-md hover:bg-emerald-100"
-        >
-          <Plus size={18} className="mr-2" />
-          {t('addNewTag')}
-        </button>
-      )}
+      {/* Add new tag button - now links to the dedicated page */}
+      <Link
+        href={`/${locale}/tags/new`}
+        className="mt-4 flex items-center justify-center w-full py-2 px-4 bg-emerald-50 text-emerald-700 rounded-md hover:bg-emerald-100"
+      >
+        <Plus size={18} className="mr-2" />
+        {t('addNewTag')}
+      </Link>
       
-      {/* Edit/Create tag form */}
+      {/* Edit tag form */}
       {editingTag && (
         <div className="mt-4 p-4 border border-gray-200 rounded-md bg-white">
           <h3 className="font-medium mb-3">
-            {editingTag.isNew ? t('addNewTag') : t('editTag')}
+            {t('editTag')}
           </h3>
           
           <div className="space-y-4">
@@ -324,6 +323,7 @@ export function TagManagement({ userId, locale }: TagManagementProps) {
                 onChange={(e) => setEditingTag({...editingTag, name: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder={t('enterTagName')}
+                maxLength={4}
               />
             </div>
             
@@ -354,14 +354,12 @@ export function TagManagement({ userId, locale }: TagManagementProps) {
                 onClick={handleSave}
                 className="flex-1 flex items-center justify-center py-2 px-4 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
               >
-                <Save size={18} className="mr-2" />
                 {t('save')}
               </button>
               <button
                 onClick={handleCancel}
                 className="flex-1 flex items-center justify-center py-2 px-4 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
               >
-                <X size={18} className="mr-2" />
                 {t('cancel')}
               </button>
             </div>
