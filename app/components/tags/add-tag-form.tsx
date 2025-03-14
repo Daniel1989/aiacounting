@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 import { toast } from 'sonner';
 import { ArrowLeft, Check } from 'lucide-react';
@@ -102,17 +102,26 @@ interface CategoryWithTags {
 export function AddTagForm({ userId, locale }: AddTagFormProps) {
   const t = useTranslations('tags');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get the return URL and category from search params
+  const returnUrl = searchParams.get('returnUrl') || `/${locale}/records/new`;
+  const initialCategory = (searchParams.get('category') as 'income' | 'cost') || 'cost';
   
   const [tagName, setTagName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
-  const [tagCategory, setTagCategory] = useState<'income' | 'cost'>('cost');
+  const [tagCategory, setTagCategory] = useState<'income' | 'cost'>(initialCategory);
   const [isLoading, setIsLoading] = useState(true);
   const [categoriesWithTags, setCategoriesWithTags] = useState<CategoryWithTags[]>([]);
+  const [tagsLoaded, setTagsLoaded] = useState(false);
   
   const supabase = createClient();
   
   // Fetch all tags and organize them by category
   useEffect(() => {
+    // Skip if tags are already loaded
+    if (tagsLoaded && selectedIcon) return;
+    
     async function fetchTags() {
       setIsLoading(true);
       
@@ -128,7 +137,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
           throw tagsError;
         }
         
-        // Set default selected icon if available
+        // Set default selected icon if available and not already set
         if (tagsData && tagsData.length > 0 && !selectedIcon) {
           setSelectedIcon(tagsData[0].icon);
         }
@@ -210,6 +219,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
           .filter(category => category.tags.length > 0);
         
         setCategoriesWithTags(categoriesArray);
+        setTagsLoaded(true);
       } catch (error) {
         console.error('Error fetching tags:', error);
         toast.error(t('errorFetchingTags'));
@@ -219,7 +229,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
     }
     
     fetchTags();
-  }, [supabase, userId, tagCategory, t, selectedIcon]);
+  }, [supabase, userId, tagCategory, t, tagsLoaded]);
   
   // Handle going back
   const handleBack = () => {
@@ -266,8 +276,18 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
       
       toast.success(t('tagAdded'));
       
-      // Navigate back to settings page
-      router.push(`/${locale}/settings`);
+      // Get the newly created tag
+      const newTag = data?.[0];
+      
+      // Navigate back to the records page with the new tag information
+      if (newTag) {
+        // Construct the return URL with the new tag information
+        const returnWithTagUrl = `${returnUrl}?newTagId=${newTag.id}&newTagName=${encodeURIComponent(newTag.name)}&newTagIcon=${encodeURIComponent(newTag.icon)}`;
+        router.push(returnWithTagUrl);
+      } else {
+        // If for some reason we don't have the new tag data, just go back to the return URL
+        router.push(returnUrl);
+      }
     } catch (error) {
       console.error('Error saving tag:', error);
       toast.error(t('errorSavingTag'));

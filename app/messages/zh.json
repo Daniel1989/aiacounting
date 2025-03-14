@@ -58,20 +58,22 @@
     "unnamed": "未命名"
   },
   "records": {
-    "addRecord": "记一笔",
+    "addRecord": "添加记录",
     "expense": "支出",
     "income": "收入",
     "amount": "金额",
     "selectTag": "选择分类",
     "note": "备注（可选）",
-    "notePlaceholder": "输入记录备注",
+    "notePlaceholder": "为此记录添加备注",
     "save": "保存记录",
-    "pleaseLogin": "请登录后添加记录",
+    "pleaseLogin": "请登录以添加记录",
     "login": "登录",
     "errorFetchingTags": "获取分类失败",
     "errorAddingRecord": "添加记录失败",
     "invalidAmount": "请输入有效金额",
-    "notLoggedIn": "您必须登录才能添加记录"
+    "notLoggedIn": "您必须登录才能添加记录",
+    "addTag": "添加标签",
+    "tagAdded": "标签添加成功"
   },
   "qrCode": {
     "scanToAccess": "请使用手机扫描下面的二维码访问此页面",

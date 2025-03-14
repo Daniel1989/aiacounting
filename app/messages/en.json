@@ -71,7 +71,9 @@
     "errorFetchingTags": "Error fetching categories",
     "errorAddingRecord": "Error adding record",
     "invalidAmount": "Please enter a valid amount",
-    "notLoggedIn": "You must be logged in to add records"
+    "notLoggedIn": "You must be logged in to add records",
+    "addTag": "Add Tag",
+    "tagAdded": "Tag added successfully"
   },
   "qrCode": {
     "scanToAccess": "Please scan the QR code below with your mobile phone to access this page",

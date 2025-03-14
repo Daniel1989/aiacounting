@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 import { CategorySection } from './category-section';
 import { TagsSection } from './tags-section';
@@ -38,7 +38,13 @@ export function MoneyForm({ userId }: MoneyFormProps) {
   const commonT = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = pathname.split('/')[1] || 'en';
+  
+  // Check for new tag parameters in the URL
+  const newTagId = searchParams.get('newTagId');
+  const newTagName = searchParams.get('newTagName');
+  const newTagIcon = searchParams.get('newTagIcon');
   
   const [formData, setFormData] = useState<FormData>({
     tagId: -1,
@@ -49,8 +55,45 @@ export function MoneyForm({ userId }: MoneyFormProps) {
   const [category, setCategory] = useState<'income' | 'cost'>('cost');
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [newTagAdded, setNewTagAdded] = useState<boolean>(false);
   
   const supabase = createClient();
+  
+  // Handle new tag from URL parameters
+  useEffect(() => {
+    if (newTagId && newTagName && newTagIcon && !newTagAdded) {
+      // Create a new tag object from URL parameters
+      const newTag: Tag = {
+        id: parseInt(newTagId),
+        name: newTagName,
+        icon: newTagIcon,
+        category: category,
+        isUserTag: true
+      };
+      
+      // Add the new tag to the tags list if it's not already there
+      setTags(prevTags => {
+        const tagExists = prevTags.some(tag => tag.id === parseInt(newTagId));
+        if (!tagExists) {
+          // Show success message
+          toast.success(t('tagAdded'));
+          // Select the new tag
+          setFormData(prev => ({
+            ...prev,
+            tagId: parseInt(newTagId)
+          }));
+          return [...prevTags, newTag];
+        }
+        return prevTags;
+      });
+      
+      setNewTagAdded(true);
+      
+      // Remove the parameters from the URL to prevent reapplying on refresh
+      const newUrl = pathname;
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [newTagId, newTagName, newTagIcon, newTagAdded, pathname, router, category, t]);
   
   // Fetch tags from Supabase
   useEffect(() => {
@@ -110,9 +153,11 @@ export function MoneyForm({ userId }: MoneyFormProps) {
             isUserTag: true
           })) || [];
         }
-        
+        console.log("tags", userTags)
+
         // Combine default and user tags
         const combinedTags = [...filteredDefaultTags, ...userTags];
+        console.log("combinedTags", combinedTags)
         setTags(combinedTags);
       } catch (error) {
         console.error('Error fetching tags:', error);
@@ -217,6 +262,7 @@ export function MoneyForm({ userId }: MoneyFormProps) {
       </div>
     );
   }
+
   
   return (
     <div className="flex flex-col h-full overflow-hidden">
