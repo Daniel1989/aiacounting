@@ -11,6 +11,10 @@ import { NumberPadSection } from './number-pad-section';
 import { toast } from 'sonner';
 import { iconFileMap } from '@/app/components/ui/icon';
 
+// Default tag names for filtering
+const DEFAULT_COST_TAGS = ['房租', '水电', '交通', '学校', '日用', '餐饮', '购物', '娱乐', '旅游', '电影', '宠物'];
+const DEFAULT_INCOME_TAGS = ['工资', '红包', '借款', '投资', '分红'];
+
 interface MoneyFormProps {
   userId: string | null;
 }
@@ -20,6 +24,7 @@ interface Tag {
   name: string;
   icon: string;
   category: 'income' | 'cost';
+  isUserTag?: boolean;
 }
 
 interface FormData {
@@ -52,30 +57,73 @@ export function MoneyForm({ userId }: MoneyFormProps) {
     async function fetchTags() {
       setIsLoading(true);
       
-      const { data, error } = await supabase
-        .from('tags')
-        .select('*')
-        .order('id', { ascending: true });
-      
-      if (error) {
+      try {
+        // Fetch default tags
+        const { data: defaultTagsData, error: defaultTagsError } = await supabase
+          .from('tags')
+          .select('*')
+          .order('id', { ascending: true });
+        
+        if (defaultTagsError) {
+          throw defaultTagsError;
+        }
+        
+        // Filter default tags based on predefined lists
+        const filteredDefaultTags = defaultTagsData?.filter(tag => {
+          const isDefaultTag = 
+            (tag.category === 'cost' && DEFAULT_COST_TAGS.includes(tag.name)) ||
+            (tag.category === 'income' && DEFAULT_INCOME_TAGS.includes(tag.name));
+          
+          // Check if the icon name exists in the mapping or is a valid file name itself
+          const hasValidIcon = 
+            iconFileMap[tag.icon] !== undefined || 
+            Object.values(iconFileMap).includes(tag.icon);
+          
+          return isDefaultTag && hasValidIcon;
+        }).map(tag => ({
+          ...tag,
+          isUserTag: false
+        })) || [];
+        
+        // Fetch user-specific tags if user is logged in
+        let userTags: Tag[] = [];
+        if (userId) {
+          const { data: userTagsData, error: userTagsError } = await supabase
+            .from('user_tags')
+            .select('*')
+            .eq('user_id', userId)
+            .order('id', { ascending: true });
+          
+          if (userTagsError) {
+            throw userTagsError;
+          }
+          
+          // Filter user tags to ensure valid icons
+          userTags = userTagsData?.filter(tag => {
+            const hasValidIcon = 
+              iconFileMap[tag.icon] !== undefined || 
+              Object.values(iconFileMap).includes(tag.icon);
+            
+            return hasValidIcon;
+          }).map(tag => ({
+            ...tag,
+            isUserTag: true
+          })) || [];
+        }
+        
+        // Combine default and user tags
+        const combinedTags = [...filteredDefaultTags, ...userTags];
+        setTags(combinedTags);
+      } catch (error) {
         console.error('Error fetching tags:', error);
         toast.error(t('errorFetchingTags'));
-      } else {
-        // Filter out tags whose icon names don't exist in iconFileMap
-        const validTags = data?.filter(tag => {
-          // Check if the icon name exists in the mapping or is a valid file name itself
-          return iconFileMap[tag.icon] !== undefined || 
-                 Object.values(iconFileMap).includes(tag.icon);
-        }) || [];
-        
-        setTags(validTags);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     }
     
     fetchTags();
-  }, [supabase, t]);
+  }, [supabase, t, userId]);
   
   // Handle form data changes
   const handleChange = (obj: Partial<FormData>) => {
@@ -103,6 +151,13 @@ export function MoneyForm({ userId }: MoneyFormProps) {
     }
     
     try {
+      // Find the selected tag to determine if it's a user tag or default tag
+      const selectedTag = tags.find(tag => tag.id === formData.tagId);
+      
+      if (!selectedTag) {
+        throw new Error('Selected tag not found');
+      }
+      
       // Insert record into Supabase
       const { error } = await supabase
         .from('records')
@@ -111,7 +166,8 @@ export function MoneyForm({ userId }: MoneyFormProps) {
             user_id: userId,
             amount: formData.amount,
             category,
-            tag_id: formData.tagId,
+            tag_id: selectedTag.isUserTag ? null : formData.tagId,
+            user_tag_id: selectedTag.isUserTag ? formData.tagId : null,
             note: formData.note || '',
           }
         ]);
