@@ -110,6 +110,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
   
   const [tagName, setTagName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('');
+  const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
   const [tagCategory, setTagCategory] = useState<'income' | 'cost'>(initialCategory);
   const [isLoading, setIsLoading] = useState(true);
   const [categoriesWithTags, setCategoriesWithTags] = useState<CategoryWithTags[]>([]);
@@ -259,7 +260,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
     }
     
     try {
-      // Create new tag
+      // Create new tag with tag_id if available
       const { data, error } = await supabase
         .from('user_tags')
         .insert([
@@ -267,7 +268,8 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
             user_id: userId,
             name: tagName,
             icon: selectedIcon,
-            category: tagCategory
+            category: tagCategory,
+            tag_id: selectedTagId // Include the reference to the original tag
           }
         ])
         .select();
@@ -295,8 +297,12 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
   };
   
   // Handle selecting a tag
-  const handleSelectTag = (icon: string) => {
+  const handleSelectTag = (icon: string, tagId?: number) => {
     setSelectedIcon(icon);
+    // If a tag ID is provided, store it for reference
+    if (tagId) {
+      setSelectedTagId(tagId);
+    }
   };
   
   if (isLoading) {
@@ -354,7 +360,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
                 {category.tags.map((tag, index) => (
                   <button 
                     key={`${tag.icon}-${tag.name}-${index}`}
-                    onClick={() => handleSelectTag(tag.icon)}
+                    onClick={() => handleSelectTag(tag.icon, tag.id)}
                     className="flex flex-col items-center w-16 h-16"
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${

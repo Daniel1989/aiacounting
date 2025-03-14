@@ -25,6 +25,7 @@ interface Tag {
   icon: string;
   category: 'income' | 'cost';
   isUserTag?: boolean;
+  originalTagId?: number;
 }
 
 interface FormData {
@@ -133,7 +134,7 @@ export function MoneyForm({ userId }: MoneyFormProps) {
         if (userId) {
           const { data: userTagsData, error: userTagsError } = await supabase
             .from('user_tags')
-            .select('*')
+            .select('*, tags:tag_id(*)')  // Join with tags table using tag_id
             .eq('user_id', userId)
             .order('id', { ascending: true });
           
@@ -150,14 +151,14 @@ export function MoneyForm({ userId }: MoneyFormProps) {
             return hasValidIcon;
           }).map(tag => ({
             ...tag,
-            isUserTag: true
+            isUserTag: true,
+            // If this user tag is based on a system tag, include that information
+            originalTagId: tag.tag_id
           })) || [];
         }
-        console.log("tags", userTags)
-
+        
         // Combine default and user tags
         const combinedTags = [...filteredDefaultTags, ...userTags];
-        console.log("combinedTags", combinedTags)
         setTags(combinedTags);
       } catch (error) {
         console.error('Error fetching tags:', error);
@@ -211,9 +212,9 @@ export function MoneyForm({ userId }: MoneyFormProps) {
             user_id: userId,
             amount: formData.amount,
             category,
-            tag_id: selectedTag.isUserTag ? null : formData.tagId,
-            user_tag_id: selectedTag.isUserTag ? formData.tagId : null,
+            tag_id: formData.tagId,
             note: formData.note || '',
+            is_user_tag: selectedTag.isUserTag || false
           }
         ]);
       
