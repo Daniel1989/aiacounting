@@ -58,8 +58,9 @@ export function Nav({ locale }: NavProps) {
     <NavContainer>
       <NavList>
         {navItems.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || pathname.startsWith(href + '/');
-          
+          console.log(pathname, href);
+          const isActive = pathname === href || (pathname.startsWith(href + '/') && href !== '/zh' && href !== '/en');
+        
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none' }}>
               <NavItem active={isActive}>

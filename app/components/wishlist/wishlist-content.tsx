@@ -27,13 +27,13 @@ interface Goal {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100vh - 60px);
   background: #f5f5f5;
   padding: 16px;
 `;
 
 const Header = styled.div`
-  text-align: center;
+  text-align: left;
   margin-bottom: 24px;
   
   > .title {
@@ -346,9 +346,9 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
     
     return (
       <Container>
-        <Header>
+        {/* <Header>
           <div className="title">{t('planStatus')}</div>
-        </Header>
+        </Header> */}
         
         <PlanStatusContainer>
           <PlanHeader>{t('planProgress')}</PlanHeader>
@@ -400,7 +400,7 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
   }
   
   return (
-    <Container>
+    <Container> 
       <Header>
         <div className="title">{t('title')}</div>
         <div className="subtitle">{t('subtitle')}</div>

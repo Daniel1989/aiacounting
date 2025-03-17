@@ -66,6 +66,13 @@ const Header = styled.header`
   padding: 16px;
   background: white;
   font-weight: bold;
+  border-bottom: 1px solid #f0f0f0;
+`;
+
+const ContentWrapper = styled.div`
+  flex: 1;
+  overflow: auto;
+  background: #f5f5f5;
 `;
 
 export default function StatisticsContent({ userId, locale }: StatisticsContentProps) {
@@ -97,13 +104,11 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
           </li>
         ))}
       </TabHeader>
-      <div className="flex-1 overflow-auto">
-        {selected === 'overview' ? (
-          <Overview userId={userId} date={current} locale={locale} />
-        ) : (
-          <PieChart userId={userId} date={current} type={selected} locale={locale} />
-        )}
-      </div>
+      <ContentWrapper>
+        {selected === 'overview' && <Overview userId={userId} locale={locale} date={current} />}
+        {selected === 'cost' && <PieChart userId={userId} locale={locale} type="cost" date={current} />}
+        {selected === 'income' && <PieChart userId={userId} locale={locale} type="income" date={current} />}
+      </ContentWrapper>
     </div>
   );
 } 

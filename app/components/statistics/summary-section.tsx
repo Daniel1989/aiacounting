@@ -36,9 +36,10 @@ interface FinancialRecord {
 const Container = styled.div`
   background: white;
   border-radius: 12px;
-  margin: 16px;
+  margin: 0 16px 16px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
 `;
 
 const Header = styled.div`
@@ -202,8 +203,8 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
           .from('records')
           .select('*')
           .eq('user_id', userId)
-          .gte('date', ninetyDaysAgo.toISOString())
-          .order('date', { ascending: false });
+          .gte('updated_at', ninetyDaysAgo.toISOString())
+          .order('updated_at', { ascending: false });
           
         if (error) {
           console.error('Error fetching records:', error);

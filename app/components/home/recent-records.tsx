@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/app/lib/supabase/client';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
+import { Icon } from '../ui/icon';
 
 interface RecordItem {
   id: string;
@@ -13,6 +14,7 @@ interface RecordItem {
   category: 'income' | 'cost';
   tag_id: number;
   created_at: string;
+  note?: string;
 }
 
 interface Tag {
@@ -32,6 +34,7 @@ interface FormattedRecord {
   icon: string;
   name: string;
   time: string;
+  note?: string;
 }
 
 interface FormattedRecordGroup {
@@ -88,7 +91,8 @@ export function RecentRecords({ records }: RecentRecordsProps) {
         amount,
         time: dateObj.format('HH:mm'),
         icon: matchedTag.icon,
-        name: matchedTag.name
+        name: matchedTag.name,
+        note: record.note
       };
       
       // Add to date group
@@ -165,9 +169,12 @@ export function RecentRecords({ records }: RecentRecordsProps) {
               >
                 <div className="flex items-center">
                   <span className="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-full mr-2">
-                    {record.icon || '💰'}
+                    <Icon name={`tags/${record.icon}`} className='icon-only' size={40} />
                   </span>
-                  <span>{record.name || t('unnamed')}</span>
+                  <div className='flex flex-col'>
+                    <span>{record.name || t('unnamed')}</span>
+                    <div className="text-sm text-gray-400 truncate" style={{ maxWidth: '160px' }}>{record.note}</div>
+                  </div>
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="font-bold">

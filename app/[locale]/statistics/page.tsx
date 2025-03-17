@@ -9,6 +9,15 @@ interface StatisticsPageProps {
   }>;
 }
 
+export async function generateMetadata({ params }: StatisticsPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations('statistics');
+  
+  return {
+    title: t('title'),
+  };
+}
+
 export default async function StatisticsPage({ params }: StatisticsPageProps) {
   const { locale } = await params;
   const user = await getCurrentUser(true, locale);
@@ -19,7 +28,7 @@ export default async function StatisticsPage({ params }: StatisticsPageProps) {
   }
   
   return (
-    <main className="flex flex-col h-full">
+    <main className="flex flex-col h-full bg-[#f5f5f5]">
       <StatisticsContent userId={user.id} locale={locale} />
     </main>
   );
