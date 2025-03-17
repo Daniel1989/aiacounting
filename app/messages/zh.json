@@ -125,5 +125,25 @@
     "errorFetchingTags": "获取标签失败",
     "notLoggedIn": "您必须登录才能添加标签",
     "loading": "加载中..."
+  },
+  "statistics": {
+    "title": "统计",
+    "overview": "概览",
+    "expense": "支出",
+    "income": "收入",
+    "monthlyIncome": "月收入",
+    "monthlyExpense": "月支出",
+    "monthlyBalance": "月结余",
+    "totalIncome": "总收入",
+    "totalExpense": "总支出",
+    "loading": "加载中...",
+    "errorLoading": "加载数据出错",
+    "noData": "该时期没有数据",
+    "previousDays": "往前7天",
+    "currentDay": "现在",
+    "nextDays": "往后7天",
+    "expenseAnalysis": "支出分析",
+    "incomeAnalysis": "收入分析",
+    "totalItems": "共{{count}}条{{type}}记录"
   }
 } 

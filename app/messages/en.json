@@ -125,5 +125,25 @@
     "errorFetchingTags": "Failed to fetch tags",
     "notLoggedIn": "You must be logged in to add tags",
     "loading": "Loading..."
+  },
+  "statistics": {
+    "title": "Statistics",
+    "overview": "Overview",
+    "expense": "Expense",
+    "income": "Income",
+    "monthlyIncome": "Monthly Income",
+    "monthlyExpense": "Monthly Expense",
+    "monthlyBalance": "Monthly Balance",
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "loading": "Loading...",
+    "errorLoading": "Error loading data",
+    "noData": "No data for this period",
+    "previousDays": "Previous 7 days",
+    "currentDay": "Current",
+    "nextDays": "Next 7 days",
+    "expenseAnalysis": "Expense Analysis",
+    "incomeAnalysis": "Income Analysis",
+    "totalItems": "{{count}} {{type}} items in total"
   }
 } 

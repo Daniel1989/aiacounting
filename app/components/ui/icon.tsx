@@ -109,6 +109,11 @@ export const iconFileMap: Record<string, string> = {
   '股票': 'stock',
   '钱包': 'wallet',
   '违章': 'weizhang',
+
+  // Add the statistics icons
+  'overview': 'overview.svg',
+  'cost': 'cost.svg',
+  'income': 'income.svg',
 };
 
 export function Icon({ name, className, size = 40 }: IconProps) {

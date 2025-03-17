@@ -1,28 +1,23 @@
-import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/app/lib/server';
+import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import StatisticsContent from '@/app/components/statistics/statistics-content';
 
-interface StatisticsPageProps {
-  params: Promise<{ locale: string }>;
-}
-
-export default async function StatisticsPage({ params }: StatisticsPageProps) {
-  // In Next.js 15, we need to await the params
-  const { locale } = await params;
+export default async function StatisticsPage({
+  params: { locale }
+}: {
+  params: { locale: string };
+}) {
+  const user = await getCurrentUser(true, locale);
+  const t = await getTranslations('statistics');
   
-  unstable_setRequestLocale(locale);
-  
-  // Use getTranslations instead of useTranslations for server components
-  const t = await getTranslations('nav');
-  
-  // Get the current user
-  const user = await getCurrentUser();
+  if (!user) {
+    return null;
+  }
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{t('statistics')}</h1>
-      <div className="bg-gray-100 p-8 rounded-lg text-center">
-        <p className="text-gray-500">Statistics feature coming soon...</p>
-      </div>
-    </div>
+    <main className="flex flex-col h-full">
+      <StatisticsContent userId={user.id} locale={locale} />
+    </main>
   );
 } 
