@@ -158,7 +158,7 @@
     "aiAnalysisError": "Couldn't generate personalized tips. Here are some general recommendations instead.",
     "tips": {
       "spendingMoreThanEarning": "You're spending more than you earn. Consider reducing expenses in your major spending categories.",
-      "highExpenseCategory": "{{percentage}}% of your spending is in the {{category}} category. Consider if you can reduce this expense.",
+      "highExpenseCategory": "{{percentage}} of your spending is in the {{category}} category. Consider if you can reduce this expense.",
       "goodSavingHabits": "Great job! You're saving money. Keep up these good habits.",
       "keepTracking": "Continue tracking your finances to get more personalized insights."
     }
