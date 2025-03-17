@@ -272,12 +272,6 @@ export function PieChart({ userId, date, type, locale }: PieChartProps) {
       <ChartHeader>
         <div className="title">{type === 'cost' ? t('expenseAnalysis') : t('incomeAnalysis')}</div>
         <div className="total">¥ {totalAmount.toFixed(2)}</div>
-        <div className="catalog-button">
-          {t('totalItems', { 
-            count: tagSummaries.length,
-            type: type === 'cost' ? t('expense') : t('income')
-          })}
-        </div>
       </ChartHeader>
       
       <ChartContainer>

@@ -95,11 +95,11 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
           <li 
             onClick={() => {setSelected(tab.icon as TabType)}}
             key={tab.icon}
-            className={selected === tab.icon ? 'selected' : ''}
+            className={selected === tab.icon ? 'selected' : 'unselected'}
           >
             <div>
               <Icon name={tab.icon} size={24} />
-              {selected === tab.icon && <span>{tab.name}</span>}
+              <span>{tab.name}</span>
             </div>
           </li>
         ))}
