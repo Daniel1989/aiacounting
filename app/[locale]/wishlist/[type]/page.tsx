@@ -8,19 +8,36 @@ interface GoalSettingPageProps {
     locale: string;
     type: string;
   };
-}
-
-export async function generateMetadata({ params }: GoalSettingPageProps) {
-  const { locale, type } = params;
-  const t = await getTranslations('wishlist');
-  
-  return {
-    title: `${t('setGoal')} - ${t(`${type}.title`)}`,
+  searchParams: {
+    edit?: string;
   };
 }
 
-export default async function GoalSettingPage({ params }: GoalSettingPageProps) {
+export async function generateMetadata(props: GoalSettingPageProps) {
+  const { params } = props;
+  const t = await getTranslations('wishlist');
+  
+  // Get the type from params and use it to determine the title suffix
+  let titleSuffix = '';
+  
+  if (params.type === 'travel') {
+    titleSuffix = t('travel.title');
+  } else if (params.type === 'shopping') {
+    titleSuffix = t('shopping.title');
+  } else if (params.type === 'savings') {
+    titleSuffix = t('savings.title');
+  }
+  
+  return {
+    title: `${t('setGoal')} - ${titleSuffix}`,
+  };
+}
+
+export default async function GoalSettingPage(props: GoalSettingPageProps) {
+  const { params, searchParams } = props;
   const { locale, type } = params;
+  const { edit } = searchParams;
+  
   const validTypes = ['travel', 'shopping', 'savings'];
   
   if (!validTypes.includes(type)) {
@@ -34,5 +51,23 @@ export default async function GoalSettingPage({ params }: GoalSettingPageProps) 
     redirect(`/${locale}/login`);
   }
   
-  return <GoalSettingForm userId={user.id} locale={locale} type={type} />;
+  let existingGoal = null;
+  
+  if (edit) {
+    const { data: goalData } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('id', edit)
+      .eq('user_id', user.id)
+      .single();
+    
+    existingGoal = goalData;
+  }
+  
+  return <GoalSettingForm 
+    userId={user.id} 
+    locale={locale} 
+    type={type} 
+    existingGoal={existingGoal}
+  />;
 } 

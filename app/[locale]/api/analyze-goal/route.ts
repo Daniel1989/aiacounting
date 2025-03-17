@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(request: Request) {
+export async function POST(request: Request, { params }: { params: { locale: string } }) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     }
     
     const { type, targetAmount, monthlyIncome, description } = await request.json();
+    const { locale } = params;
     
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       .filter(record => record.type === 'expense')
       .reduce((sum, record) => sum + record.amount, 0);
     const avgMonthlyExpense = totalExpenses / 3; // 90 days = 3 months
+    const avgDailyExpense = avgMonthlyExpense / 30; // Average daily expense
 
     // Prepare spending breakdown
     const spendingBreakdown = records
@@ -49,8 +51,12 @@ export async function POST(request: Request) {
       .map(([category, amount]) => `- ${category}: ${amount.toFixed(2)}`)
       .join('\n');
 
+    // Determine language for the prompt
+    const language = locale === 'zh' ? 'Chinese' : 'English';
+    
     // Prepare the prompt for OpenAI
-    const prompt = `As a financial advisor, analyze this user's goal and spending patterns:
+    const prompt = `As a financial advisor, analyze this user's goal and spending patterns. 
+Respond in ${language} language.
 
 Goal Type: ${type}
 ${targetAmount ? `Target Amount: ${targetAmount}` : ''}
@@ -59,6 +65,7 @@ Goal Description: ${description}
 
 Current Financial Status:
 - Average Monthly Expenses: ${avgMonthlyExpense.toFixed(2)}
+- Average Daily Expenses: ${avgDailyExpense.toFixed(2)}
 - Last 90 Days Total Expenses: ${totalExpenses.toFixed(2)}
 
 Detailed spending breakdown:
@@ -78,7 +85,9 @@ Format the response in JSON with the following structure:
   "suggestions": string[],
   "actionableSteps": string[],
   "challenges": [{"challenge": string, "solution": string}]
-}`;
+}
+
+Remember to respond in ${language} language.`;
 
     const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
@@ -92,9 +101,8 @@ Format the response in JSON with the following structure:
     }
     
     const analysis = JSON.parse(content);
-
+    
     // Store the analysis result
-    console.log('Analysis:', analysis);
     const { error: analysisError } = await supabase
       .from('goal_analyses')
       .insert({
@@ -113,7 +121,7 @@ Format the response in JSON with the following structure:
     if (analysisError) {
       console.error('Error storing analysis:', analysisError);
     }
-
+    
     return NextResponse.json(analysis);
   } catch (error) {
     console.log('Error:', error);

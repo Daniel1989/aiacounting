@@ -177,6 +177,7 @@
     "estimatedTime": "Estimated Time",
     "days": "days",
     "dailySavings": "Daily Savings",
+    "dailyMaxSpending": "Daily Max Spending",
     "suggestions": "Suggestions",
     "actionableSteps": "Action Plan",
     "challenges": "Potential Challenges",
@@ -184,6 +185,23 @@
     "confirmPlan": "Confirm Plan",
     "goalCreated": "Goal created successfully",
     "errorCreatingGoal": "Error creating goal",
-    "errorAnalyzing": "Error analyzing goal"
+    "errorAnalyzing": "Error analyzing goal",
+    "planStatus": "Plan Status",
+    "planProgress": "Plan Progress",
+    "targetProgress": "Target Progress",
+    "completed": "Completed",
+    "monthStatus": "This Month Status",
+    "aheadOfPlan": "Ahead of plan",
+    "dailyRecords": "Daily Records",
+    "todayExpense": "Today's Expense",
+    "recommendedExpense": "Recommended Expense",
+    "savings": "Savings",
+    "adjustPlan": "Adjust Plan",
+    "abandonPlan": "Abandon Plan",
+    "editGoal": "Edit Goal",
+    "updateAnalysis": "Update Analysis",
+    "updatePlan": "Update Plan",
+    "goalUpdated": "Goal updated successfully",
+    "errorUpdatingGoal": "Error updating goal"
   }
 } 

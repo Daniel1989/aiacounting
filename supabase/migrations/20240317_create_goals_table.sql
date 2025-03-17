@@ -36,6 +36,7 @@ create policy "Users can delete their own goals"
 create table if not exists public.goal_analyses (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
+  goal_id uuid references public.goals(id) on delete cascade,
   goal_type text not null,
   target_amount decimal(12,2),
   monthly_income decimal(12,2) not null,

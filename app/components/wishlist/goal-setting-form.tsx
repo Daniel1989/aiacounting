@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
@@ -12,6 +12,7 @@ interface GoalSettingFormProps {
   userId: string;
   locale: string;
   type: string;
+  existingGoal?: any;
 }
 
 interface AnalysisResult {
@@ -246,7 +247,7 @@ const ActionButtons = styled.div`
   }
 `;
 
-export default function GoalSettingForm({ userId, locale, type }: GoalSettingFormProps) {
+export default function GoalSettingForm({ userId, locale, type, existingGoal }: GoalSettingFormProps) {
   const t = useTranslations('wishlist');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -257,6 +258,28 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
     monthlyIncome: '',
     description: ''
   });
+  
+  // Initialize form with existing goal data if available
+  useEffect(() => {
+    if (existingGoal) {
+      setFormData({
+        targetAmount: existingGoal.target_amount ? String(existingGoal.target_amount) : '',
+        monthlyIncome: String(existingGoal.monthly_income),
+        description: existingGoal.description
+      });
+      
+      // If the goal has analysis data, set it
+      if (existingGoal.time_to_goal && existingGoal.daily_savings) {
+        setAnalysis({
+          timeToGoal: existingGoal.time_to_goal,
+          dailySavings: existingGoal.daily_savings,
+          suggestions: [],
+          actionableSteps: [],
+          challenges: []
+        });
+      }
+    }
+  }, [existingGoal]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,27 +341,42 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
     try {
       const supabase = createClient();
       
-      // Create a new goal
-      const { error } = await supabase
-        .from('goals')
-        .insert({
-          user_id: userId,
-          type,
-          target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
-          monthly_income: parseFloat(formData.monthlyIncome),
-          description: formData.description,
-          time_to_goal: analysis?.timeToGoal,
-          daily_savings: analysis?.dailySavings,
-          status: 'active'
-        });
+      const goalData = {
+        user_id: userId,
+        type,
+        target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+        monthly_income: parseFloat(formData.monthlyIncome),
+        description: formData.description,
+        time_to_goal: analysis?.timeToGoal,
+        daily_savings: analysis?.dailySavings,
+        status: 'active'
+      };
       
-      if (error) throw error;
+      if (existingGoal) {
+        // Update existing goal
+        const { error } = await supabase
+          .from('goals')
+          .update(goalData)
+          .eq('id', existingGoal.id);
+        
+        if (error) throw error;
+        
+        toast.success(t('goalUpdated'));
+      } else {
+        // Create new goal
+        const { error } = await supabase
+          .from('goals')
+          .insert(goalData);
+        
+        if (error) throw error;
+        
+        toast.success(t('goalCreated'));
+      }
       
-      toast.success(t('goalCreated'));
       router.push(`/${locale}/wishlist`);
     } catch (error) {
-      console.error('Error creating goal:', error);
-      toast.error(t('errorCreatingGoal'));
+      console.error('Error saving goal:', error);
+      toast.error(existingGoal ? t('errorUpdatingGoal') : t('errorCreatingGoal'));
     }
   };
   
@@ -358,7 +396,7 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
     return (
       <Container>
         <Header>
-          <div className="title">{t('analysisResult')}</div>
+          <div className="title">{existingGoal ? t('updatePlan') : t('analysisResult')}</div>
         </Header>
         
         <AnalysisResult>
@@ -376,35 +414,41 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
             </div>
           </div>
           
-          <div className="section">
-            <div className="title">{t('suggestions')}</div>
-            <div className="content list">
-              {analysis.suggestions.map((suggestion, index) => (
-                <div key={index} className="item">{suggestion}</div>
-              ))}
+          {analysis.suggestions && analysis.suggestions.length > 0 && (
+            <div className="section">
+              <div className="title">{t('suggestions')}</div>
+              <div className="content list">
+                {analysis.suggestions.map((suggestion, index) => (
+                  <div key={index} className="item">{suggestion}</div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           
-          <div className="section">
-            <div className="title">{t('actionableSteps')}</div>
-            <div className="content list">
-              {analysis.actionableSteps.map((step, index) => (
-                <div key={index} className="item">{step}</div>
-              ))}
+          {analysis.actionableSteps && analysis.actionableSteps.length > 0 && (
+            <div className="section">
+              <div className="title">{t('actionableSteps')}</div>
+              <div className="content list">
+                {analysis.actionableSteps.map((step, index) => (
+                  <div key={index} className="item">{step}</div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           
-          <div className="section">
-            <div className="title">{t('challenges')}</div>
-            <div className="content challenges">
-              {analysis.challenges.map((item, index) => (
-                <div key={index} className="challenge">
-                  <div className="problem">{item.challenge}</div>
-                  <div className="solution">{item.solution}</div>
-                </div>
-              ))}
+          {analysis.challenges && analysis.challenges.length > 0 && (
+            <div className="section">
+              <div className="title">{t('challenges')}</div>
+              <div className="content challenges">
+                {analysis.challenges.map((item, index) => (
+                  <div key={index} className="challenge">
+                    <div className="problem">{item.challenge}</div>
+                    <div className="solution">{item.solution}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </AnalysisResult>
         
         <ActionButtons>
@@ -412,7 +456,7 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
             {t('reanalyze')}
           </button>
           <button className="primary" onClick={handleConfirm}>
-            {t('confirmPlan')}
+            {existingGoal ? t('updatePlan') : t('confirmPlan')}
           </button>
         </ActionButtons>
       </Container>
@@ -429,7 +473,7 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
         >
           <ArrowLeft size={24} />
         </button>
-        <div className="title">{t('setGoal')}</div>
+        <div className="title">{existingGoal ? t('editGoal') : t('setGoal')}</div>
       </Header>
       
       <Form onSubmit={handleSubmit}>
@@ -478,7 +522,7 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
           type="submit" 
           disabled={!isValid() || isSubmitting}
         >
-          {t('startAnalysis')}
+          {existingGoal ? t('updateAnalysis') : t('startAnalysis')}
         </SubmitButton>
       </Form>
     </Container>

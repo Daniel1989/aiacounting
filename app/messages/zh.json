@@ -177,6 +177,7 @@
     "estimatedTime": "预计时间",
     "days": "天",
     "dailySavings": "每日储蓄",
+    "dailyMaxSpending": "每日最高支出",
     "suggestions": "建议",
     "actionableSteps": "行动计划",
     "challenges": "潜在挑战",
@@ -184,6 +185,23 @@
     "confirmPlan": "确认计划",
     "goalCreated": "目标创建成功",
     "errorCreatingGoal": "创建目标时出错",
-    "errorAnalyzing": "分析目标时出错"
+    "errorAnalyzing": "分析目标时出错",
+    "planStatus": "计划进度",
+    "planProgress": "计划进度",
+    "targetProgress": "目标进度",
+    "completed": "已完成",
+    "monthStatus": "本月状态",
+    "aheadOfPlan": "领先计划",
+    "dailyRecords": "每日记录",
+    "todayExpense": "今日支出",
+    "recommendedExpense": "建议支出",
+    "savings": "节省",
+    "adjustPlan": "调整计划",
+    "abandonPlan": "放弃计划",
+    "editGoal": "编辑目标",
+    "updateAnalysis": "更新分析",
+    "updatePlan": "更新计划",
+    "goalUpdated": "目标更新成功",
+    "errorUpdatingGoal": "更新目标时出错"
   }
 } 
