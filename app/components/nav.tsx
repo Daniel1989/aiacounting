@@ -1,90 +1,75 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Home, PiggyBank, BarChart, Settings } from 'lucide-react';
+import { Home, PiggyBank, BarChart, Settings, Heart } from 'lucide-react';
+import { styled } from 'styled-components';
 
 interface NavProps {
   locale: string;
 }
 
-export function Nav({ locale }: NavProps) {
-  const t = useTranslations('nav');
-  const pathname = usePathname();
+const NavContainer = styled.nav`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+  padding: 8px 0;
+  z-index: 100;
+`;
+
+const NavList = styled.ul`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+
+const NavItem = styled.li<{ active: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  color: ${props => props.active ? '#53a867' : '#999'};
   
-  // Check if the current path matches the given path
-  const isActive = (path: string) => {
-    if (path === '/') {
-      return pathname === `/${locale}` || pathname === `/${locale}/`;
-    }
-    return pathname.includes(`/${locale}${path}`);
-  };
+  > span {
+    margin-top: 4px;
+  }
+`;
+
+export function Nav({ locale }: NavProps) {
+  const pathname = usePathname();
+  const t = useTranslations('nav');
+  
+  const navItems = [
+    { href: `/${locale}`, icon: Home, label: t('today') },
+    { href: `/${locale}/records/new`, icon: PiggyBank, label: t('addRecord') },
+    { href: `/${locale}/statistics`, icon: BarChart, label: t('statistics') },
+    { href: `/${locale}/wishlist`, icon: Heart, label: t('wishlist') },
+    { href: `/${locale}/settings`, icon: Settings, label: t('settings') }
+  ];
   
   return (
-    <nav className="bg-[#f7f8f3] fixed bottom-0 left-0 right-0 z-10">
-      <ul className="flex">
-        <li className="w-1/4 text-sm">
-          <Link 
-            href={`/${locale}`}
-            className={`py-2 px-1 flex flex-col items-center justify-center text-xs ${
-              isActive('/') ? 'text-emerald-500' : 'text-gray-400'
-            }`}
-          >
-            <Home 
-              className={`w-6 h-6 mb-1 ${
-                isActive('/') ? 'text-emerald-500' : 'text-gray-400'
-              }`} 
-            />
-            {t('today')}
-          </Link>
-        </li>
-        <li className="w-1/4 text-sm">
-          <Link 
-            href={`/${locale}/records/new`}
-            className={`py-2 px-1 flex flex-col items-center justify-center text-xs ${
-              isActive('/records/new') ? 'text-emerald-500' : 'text-gray-400'
-            }`}
-          >
-            <PiggyBank 
-              className={`w-6 h-6 mb-1 ${
-                isActive('/records/new') ? 'text-emerald-500' : 'text-gray-400'
-              }`} 
-            />
-            {t('addRecord')}
-          </Link>
-        </li>
-        <li className="w-1/4 text-sm">
-          <Link 
-            href={`/${locale}/statistics`}
-            className={`py-2 px-1 flex flex-col items-center justify-center text-xs ${
-              isActive('/statistics') ? 'text-emerald-500' : 'text-gray-400'
-            }`}
-          >
-            <BarChart 
-              className={`w-6 h-6 mb-1 ${
-                isActive('/statistics') ? 'text-emerald-500' : 'text-gray-400'
-              }`} 
-            />
-            {t('statistics')}
-          </Link>
-        </li>
-        <li className="w-1/4 text-sm">
-          <Link 
-            href={`/${locale}/settings`}
-            className={`py-2 px-1 flex flex-col items-center justify-center text-xs ${
-              isActive('/settings') ? 'text-emerald-500' : 'text-gray-400'
-            }`}
-          >
-            <Settings 
-              className={`w-6 h-6 mb-1 ${
-                isActive('/settings') ? 'text-emerald-500' : 'text-gray-400'
-              }`} 
-            />
-            {t('settings')}
-          </Link>
-        </li>
-      </ul>
-    </nav>
+    <NavContainer>
+      <NavList>
+        {navItems.map(({ href, icon: Icon, label }) => {
+          const isActive = pathname === href || pathname.startsWith(href + '/');
+          
+          return (
+            <Link key={href} href={href} style={{ textDecoration: 'none' }}>
+              <NavItem active={isActive}>
+                <Icon size={24} />
+                <span>{label}</span>
+              </NavItem>
+            </Link>
+          );
+        })}
+      </NavList>
+    </NavContainer>
   );
 } 

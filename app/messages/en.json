@@ -42,7 +42,8 @@
     "today": "Today",
     "addRecord": "Add Record",
     "statistics": "Statistics",
-    "settings": "Settings"
+    "settings": "Settings",
+    "wishlist": "Wishlist"
   },
   "home": {
     "today": "TODAY",
@@ -145,5 +146,31 @@
     "expenseAnalysis": "Expense Analysis",
     "incomeAnalysis": "Income Analysis",
     "totalItems": "{{count}} {{type}} items in total"
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "subtitle": "Set and track your goals",
+    "travel": {
+      "title": "Travel",
+      "description": "Plan your next adventure"
+    },
+    "shopping": {
+      "title": "Shopping",
+      "description": "Save for your desired items"
+    },
+    "savings": {
+      "title": "Savings",
+      "description": "Build your financial future"
+    },
+    "setGoal": "Set Goal",
+    "targetAmount": "Target Amount",
+    "enterTargetAmount": "Enter your target amount",
+    "monthlyIncome": "Monthly Income",
+    "enterMonthlyIncome": "Enter your monthly income",
+    "goalDescription": "Goal Description",
+    "enterGoalDescription": "Describe your goal in detail",
+    "startAnalysis": "Start Analysis",
+    "goalCreated": "Goal created successfully",
+    "errorCreatingGoal": "Error creating goal"
   }
 } 
