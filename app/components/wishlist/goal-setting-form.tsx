@@ -14,6 +14,14 @@ interface GoalSettingFormProps {
   type: string;
 }
 
+interface AnalysisResult {
+  timeToGoal: number;
+  dailySavings: number;
+  suggestions: string[];
+  actionableSteps: string[];
+  challenges: { challenge: string; solution: string; }[];
+}
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -97,10 +105,153 @@ const SubmitButton = styled.button`
   }
 `;
 
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  text-align: center;
+  
+  > .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+  }
+  
+  > .text {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  > .subtext {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const AnalysisResult = styled.div`
+  padding: 24px 16px;
+  
+  > .section {
+    margin-bottom: 32px;
+    
+    > .title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    
+    > .content {
+      background: #f5f5f5;
+      padding: 16px;
+      border-radius: 8px;
+      
+      &.metrics {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        
+        > .metric {
+          text-align: center;
+          
+          > .value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 4px;
+          }
+          
+          > .label {
+            font-size: 14px;
+            color: #666;
+          }
+        }
+      }
+      
+      &.list {
+        > .item {
+          margin-bottom: 12px;
+          padding-left: 20px;
+          position: relative;
+          
+          &:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+          }
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      
+      &.challenges {
+        > .challenge {
+          margin-bottom: 16px;
+          
+          > .problem {
+            font-weight: 500;
+            margin-bottom: 8px;
+          }
+          
+          > .solution {
+            color: #666;
+            padding-left: 16px;
+          }
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+`;
+
+const ActionButtons = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 16px;
+  
+  > button {
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    
+    &.primary {
+      background: #000;
+      color: white;
+      border: none;
+    }
+    
+    &.secondary {
+      background: white;
+      color: #000;
+      border: 1px solid #000;
+    }
+  }
+`;
+
 export default function GoalSettingForm({ userId, locale, type }: GoalSettingFormProps) {
   const t = useTranslations('wishlist');
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [formData, setFormData] = useState({
     targetAmount: '',
     monthlyIncome: '',
@@ -114,28 +265,34 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
     
     try {
       setIsSubmitting(true);
+      setIsAnalyzing(true);
       
-      const supabase = createClient();
-      
-      // Create a new goal
-      const { error } = await supabase
-        .from('goals')
-        .insert({
-          user_id: userId,
+      // Start AI analysis
+      const response = await fetch(`/${locale}/api/analyze-goal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           type,
-          target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
-          monthly_income: parseFloat(formData.monthlyIncome),
+          targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+          monthlyIncome: parseFloat(formData.monthlyIncome),
           description: formData.description,
-          status: 'active'
-        });
+        }),
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Analysis failed');
+      }
       
-      toast.success(t('goalCreated'));
-      router.push(`/${locale}/wishlist`);
+      const analysisResult = await response.json();
+      setAnalysis(analysisResult);
+      setIsAnalyzing(false);
+      
     } catch (error) {
-      console.error('Error creating goal:', error);
-      toast.error(t('errorCreatingGoal'));
+      console.error('Error:', error);
+      toast.error(t('errorAnalyzing'));
+      setIsAnalyzing(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -156,6 +313,111 @@ export default function GoalSettingForm({ userId, locale, type }: GoalSettingFor
     }
     return formData.monthlyIncome.trim() !== '' && formData.description.trim() !== '';
   };
+
+  const handleConfirm = async () => {
+    try {
+      const supabase = createClient();
+      
+      // Create a new goal
+      const { error } = await supabase
+        .from('goals')
+        .insert({
+          user_id: userId,
+          type,
+          target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+          monthly_income: parseFloat(formData.monthlyIncome),
+          description: formData.description,
+          time_to_goal: analysis?.timeToGoal,
+          daily_savings: analysis?.dailySavings,
+          status: 'active'
+        });
+      
+      if (error) throw error;
+      
+      toast.success(t('goalCreated'));
+      router.push(`/${locale}/wishlist`);
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      toast.error(t('errorCreatingGoal'));
+    }
+  };
+  
+  if (isAnalyzing) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <div className="spinner" />
+          <div className="text">{t('analyzing')}</div>
+          <div className="subtext">{t('analyzingDescription')}</div>
+        </LoadingContainer>
+      </Container>
+    );
+  }
+  
+  if (analysis) {
+    return (
+      <Container>
+        <Header>
+          <div className="title">{t('analysisResult')}</div>
+        </Header>
+        
+        <AnalysisResult>
+          <div className="section">
+            <div className="title">{t('overview')}</div>
+            <div className="content metrics">
+              <div className="metric">
+                <div className="value">{analysis.timeToGoal} {t('days')}</div>
+                <div className="label">{t('estimatedTime')}</div>
+              </div>
+              <div className="metric">
+                <div className="value">¥{analysis.dailySavings.toFixed(2)}</div>
+                <div className="label">{t('dailySavings')}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="section">
+            <div className="title">{t('suggestions')}</div>
+            <div className="content list">
+              {analysis.suggestions.map((suggestion, index) => (
+                <div key={index} className="item">{suggestion}</div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="section">
+            <div className="title">{t('actionableSteps')}</div>
+            <div className="content list">
+              {analysis.actionableSteps.map((step, index) => (
+                <div key={index} className="item">{step}</div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="section">
+            <div className="title">{t('challenges')}</div>
+            <div className="content challenges">
+              {analysis.challenges.map((item, index) => (
+                <div key={index} className="challenge">
+                  <div className="problem">{item.challenge}</div>
+                  <div className="solution">{item.solution}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </AnalysisResult>
+        
+        <ActionButtons>
+          <button className="secondary" onClick={() => setAnalysis(null)}>
+            {t('reanalyze')}
+          </button>
+          <button className="primary" onClick={handleConfirm}>
+            {t('confirmPlan')}
+          </button>
+        </ActionButtons>
+      </Container>
+    );
+  }
   
   return (
     <Container>

@@ -170,7 +170,20 @@
     "goalDescription": "目标描述",
     "enterGoalDescription": "详细描述你的目标",
     "startAnalysis": "开始分析",
+    "analyzing": "正在分析中",
+    "analyzingDescription": "我们正在为你生成个性化计划",
+    "analysisResult": "分析报告",
+    "overview": "概览",
+    "estimatedTime": "预计时间",
+    "days": "天",
+    "dailySavings": "每日储蓄",
+    "suggestions": "建议",
+    "actionableSteps": "行动计划",
+    "challenges": "潜在挑战",
+    "reanalyze": "重新分析",
+    "confirmPlan": "确认计划",
     "goalCreated": "目标创建成功",
-    "errorCreatingGoal": "创建目标时出错"
+    "errorCreatingGoal": "创建目标时出错",
+    "errorAnalyzing": "分析目标时出错"
   }
 } 

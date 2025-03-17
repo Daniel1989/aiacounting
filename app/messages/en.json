@@ -170,7 +170,20 @@
     "goalDescription": "Goal Description",
     "enterGoalDescription": "Describe your goal in detail",
     "startAnalysis": "Start Analysis",
+    "analyzing": "Analyzing Your Goal",
+    "analyzingDescription": "We are creating a personalized plan based on your spending patterns",
+    "analysisResult": "Analysis Result",
+    "overview": "Overview",
+    "estimatedTime": "Estimated Time",
+    "days": "days",
+    "dailySavings": "Daily Savings",
+    "suggestions": "Suggestions",
+    "actionableSteps": "Action Plan",
+    "challenges": "Potential Challenges",
+    "reanalyze": "Reanalyze",
+    "confirmPlan": "Confirm Plan",
     "goalCreated": "Goal created successfully",
-    "errorCreatingGoal": "Error creating goal"
+    "errorCreatingGoal": "Error creating goal",
+    "errorAnalyzing": "Error analyzing goal"
   }
 } 
