@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { createClient } from '@/app/lib/supabase/auth';
+import { createClient } from '@/app/lib/supabase/client';
 
 interface NavigationProps {
   locale: string;

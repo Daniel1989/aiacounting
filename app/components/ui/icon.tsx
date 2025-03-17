@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import { cn } from '@/app/lib/utils';
 
@@ -118,7 +116,7 @@ export const iconFileMap: Record<string, string> = {
 
 export function Icon({ name, className, size = 40 }: IconProps) {
   // For tag icons, we use the public directory
-  if (name.startsWith('tags/')) {
+  if (name && name.includes('tags/')) {
     const tagName = name.split('/')[1];
     // Get the file name from the map or use the tag name directly
     const fileName = iconFileMap[tagName];
@@ -146,3 +144,5 @@ export function Icon({ name, className, size = 40 }: IconProps) {
   }
   return null;
 } 
+
+export default Icon;

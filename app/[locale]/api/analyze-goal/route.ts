@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(request: Request, { params }: { params: { locale: string } }) {
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -16,7 +16,7 @@ export async function POST(request: Request, { params }: { params: { locale: str
     }
     
     const { type, targetAmount, monthlyIncome, description } = await request.json();
-    const { locale } = params;
+    const { locale } = await request.json();
     
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();

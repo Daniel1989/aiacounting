@@ -26,7 +26,7 @@ This project uses [Supabase](https://supabase.com/) for the backend database. To
 
 1. Create a Supabase project
 2. Set up the database schema using the SQL script in the `sql/setup.sql` file
-3. Configure the environment variables in `.env.local` to connect to your Supabase project
+3. Configure the environment variables in `.env` to connect to your Supabase project
 
 For more details, see the [SQL folder README](./sql/README.md).
 

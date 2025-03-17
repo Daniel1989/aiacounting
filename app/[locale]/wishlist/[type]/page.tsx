@@ -13,7 +13,7 @@ interface GoalSettingPageProps {
   };
 }
 
-export async function generateMetadata(props: GoalSettingPageProps) {
+export async function generateMetadata(props: any) {
   const params = await props.params;
   const t = await getTranslations('wishlist');
   
@@ -33,7 +33,7 @@ export async function generateMetadata(props: GoalSettingPageProps) {
   };
 }
 
-export default async function GoalSettingPage(props: GoalSettingPageProps) {
+export default async function GoalSettingPage(props: any) {
   const params = await props.params;
   const { searchParams } = props;
   const { locale, type } = params;

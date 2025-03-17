@@ -11,7 +11,7 @@ interface LoginPageProps {
 export default async function LoginPage({ 
   params, 
   searchParams 
-}: LoginPageProps) {
+}: any) {
   // In Next.js 15, we need to await the params
   const { locale } = await params;
   
