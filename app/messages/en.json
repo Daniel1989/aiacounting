@@ -217,5 +217,22 @@
     "updatePlan": "Update Plan",
     "goalUpdated": "Goal updated successfully",
     "errorUpdatingGoal": "Error updating goal"
+  },
+  "imageUpload": {
+    "uploadReceipt": "Upload Receipt Photo",
+    "analyzingReceipt": "Analyzing receipt...",
+    "recognizedItems": "Recognized Items",
+    "description": "Description",
+    "amount": "Amount",
+    "type": "Type",
+    "category": "Category",
+    "include": "Include",
+    "expense": "Expense",
+    "income": "Income",
+    "cancel": "Cancel",
+    "saveRecords": "Save Records",
+    "notAReceipt": "This is not an image of a receipt or bill. Please upload an image containing expense or income information.",
+    "noItemsSelected": "No items selected. Please select at least one item to save.",
+    "recordsSaved": "{{count}} records saved successfully!"
   }
 } 

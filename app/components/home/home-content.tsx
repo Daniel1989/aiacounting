@@ -8,6 +8,7 @@ import { createClient } from '@/app/lib/supabase/client';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import Decimal from 'decimal.js';
 import { RecentRecords } from './recent-records';
+import { ImageUpload } from './image-upload';
 
 interface HomeContentProps {
   userId: string | null;
@@ -184,6 +185,9 @@ export function HomeContent({ userId }: HomeContentProps) {
           {t('addRecord')}
         </Link>
       </div>
+      
+      {/* Image Upload Component */}
+      {userId && <ImageUpload userId={userId} />}
       
       {/* Toggle recent records - styled like the legacy ShowRecordButton component */}
       <button 

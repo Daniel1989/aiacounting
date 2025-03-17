@@ -217,5 +217,22 @@
     "updatePlan": "更新计划",
     "goalUpdated": "目标更新成功",
     "errorUpdatingGoal": "更新目标时出错"
+  },
+  "imageUpload": {
+    "uploadReceipt": "上传收据照片",
+    "analyzingReceipt": "正在分析收据...",
+    "recognizedItems": "识别到的项目",
+    "description": "描述",
+    "amount": "金额",
+    "type": "类型",
+    "category": "类别",
+    "include": "包含",
+    "expense": "支出",
+    "income": "收入",
+    "cancel": "取消",
+    "saveRecords": "保存记录",
+    "notAReceipt": "这不是一张收据或账单的图片。请上传包含费用或收入信息的图片。",
+    "noItemsSelected": "未选择任何项目。请至少选择一个项目进行保存。",
+    "recordsSaved": "成功保存 {{count}} 条记录！"
   }
 } 
