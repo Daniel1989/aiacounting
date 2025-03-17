@@ -42,7 +42,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  background: #000;
+  background: #53a867;
   color: white;
   padding: 16px;
   font-size: 16px;
@@ -75,6 +75,12 @@ const SummaryItem = styled.div`
   background: #f5f5f5;
   border-radius: 8px;
   padding: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(83, 168, 103, 0.1);
+  }
   
   > .label {
     font-size: 12px;
@@ -104,17 +110,22 @@ const SummaryItem = styled.div`
 
 const TipsList = styled.div`
   margin-top: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #53a867;
   
   > .title {
     font-size: 14px;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    color: #53a867;
   }
   
   > .tip {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     
     > svg {
       margin-right: 8px;
@@ -125,6 +136,11 @@ const TipsList = styled.div`
     > .text {
       font-size: 14px;
       color: #333;
+      line-height: 1.5;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 `;
@@ -135,22 +151,30 @@ const NotEnoughData = styled.div`
   align-items: center;
   padding: 24px 16px;
   text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin: 8px 0;
   
   > svg {
     margin-bottom: 16px;
-    color: #a0cac6;
+    color: #53a867;
+    background: rgba(83, 168, 103, 0.1);
+    padding: 8px;
+    border-radius: 50%;
   }
   
   > .title {
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 8px;
+    color: #53a867;
   }
   
   > .message {
     font-size: 14px;
     color: #666;
     line-height: 1.5;
+    max-width: 280px;
   }
 `;
 
