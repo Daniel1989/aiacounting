@@ -145,7 +145,21 @@
     "nextDays": "往后7天",
     "expenseAnalysis": "支出分析",
     "incomeAnalysis": "收入分析",
-    "totalItems": "共{{count}}条{{type}}记录"
+    "totalItems": "共{{count}}条{{type}}记录",
+    "summary": "90天总结",
+    "expandSummary": "展开总结",
+    "collapseSummary": "收起总结",
+    "balance": "结余",
+    "recordCount": "总记录数",
+    "financialTips": "财务建议",
+    "notEnoughData": "数据不足",
+    "keepRecordingMessage": "继续记录您的支出和收入，以获取个性化的见解和建议。",
+    "tips": {
+      "spendingMoreThanEarning": "您的支出超过了收入。考虑减少在主要支出类别上的花费。",
+      "highExpenseCategory": "您的{{percentage}}%支出都在{{category}}类别。考虑是否可以减少这方面的支出。",
+      "goodSavingHabits": "做得好！您正在存钱。保持这些好习惯。",
+      "keepTracking": "持续跟踪您的财务状况，以获取更多个性化的见解。"
+    }
   },
   "wishlist": {
     "title": "心愿",

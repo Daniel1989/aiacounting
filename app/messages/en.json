@@ -145,7 +145,21 @@
     "nextDays": "Next 7 days",
     "expenseAnalysis": "Expense Analysis",
     "incomeAnalysis": "Income Analysis",
-    "totalItems": "{{count}} {{type}} items in total"
+    "totalItems": "{{count}} {{type}} items in total",
+    "summary": "90-Day Summary",
+    "expandSummary": "Expand summary",
+    "collapseSummary": "Collapse summary",
+    "balance": "Balance",
+    "recordCount": "Total Records",
+    "financialTips": "Financial Tips",
+    "notEnoughData": "Not Enough Data",
+    "keepRecordingMessage": "Keep recording your expenses and income to see personalized insights and tips.",
+    "tips": {
+      "spendingMoreThanEarning": "You're spending more than you earn. Consider reducing expenses in your top spending categories.",
+      "highExpenseCategory": "{{percentage}}% of your expenses are in {{category}}. Consider if you can reduce spending in this area.",
+      "goodSavingHabits": "Great job! You're saving money. Keep up the good habits.",
+      "keepTracking": "Keep tracking your finances consistently to get more personalized insights."
+    }
   },
   "wishlist": {
     "title": "Wishlist",

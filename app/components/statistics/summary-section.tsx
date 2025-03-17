@@ -1,0 +1,375 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { styled } from 'styled-components';
+import { createClient } from '@/app/lib/supabase/client';
+import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+
+interface SummarySectionProps {
+  userId: string;
+  locale: string;
+}
+
+interface SummaryData {
+  recordCount: number;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  topExpenseCategory: string;
+  topIncomeCategory: string;
+  hasSavings: boolean;
+  tips: string[];
+}
+
+interface FinancialRecord {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  date: string;
+  description?: string;
+  created_at: string;
+}
+
+const Container = styled.div`
+  background: white;
+  border-radius: 12px;
+  margin: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+`;
+
+const Header = styled.div`
+  background: #000;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  
+  > .toggle-icon {
+    transition: transform 0.2s ease;
+  }
+`;
+
+const Content = styled.div<{ isCollapsed: boolean }>`
+  padding: ${props => props.isCollapsed ? '0' : '16px'};
+  max-height: ${props => props.isCollapsed ? '0' : '500px'};
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+`;
+
+const SummaryGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+`;
+
+const SummaryItem = styled.div`
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+  
+  > .label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  
+  > .value {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    
+    > svg {
+      margin-right: 4px;
+    }
+    
+    &.positive {
+      color: #53a867;
+    }
+    
+    &.negative {
+      color: #e74c3c;
+    }
+  }
+`;
+
+const TipsList = styled.div`
+  margin-top: 16px;
+  
+  > .title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  > .tip {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    
+    > svg {
+      margin-right: 8px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    
+    > .text {
+      font-size: 14px;
+      color: #333;
+    }
+  }
+`;
+
+const NotEnoughData = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  text-align: center;
+  
+  > svg {
+    margin-bottom: 16px;
+    color: #a0cac6;
+  }
+  
+  > .title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  > .message {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+  }
+`;
+
+export default function SummarySection({ userId, locale }: SummarySectionProps) {
+  const t = useTranslations('statistics');
+  const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+  
+  useEffect(() => {
+    const fetchSummaryData = async () => {
+      try {
+        setIsLoading(true);
+        const supabase = createClient();
+        
+        // Get last 90 days of records
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+        
+        const { data: records, error } = await supabase
+          .from('records')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('date', ninetyDaysAgo.toISOString())
+          .order('date', { ascending: false });
+          
+        if (error) {
+          console.error('Error fetching records:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        if (!records || records.length < 3) {
+          setSummaryData({
+            recordCount: records?.length || 0,
+            totalIncome: 0,
+            totalExpense: 0,
+            balance: 0,
+            topExpenseCategory: '',
+            topIncomeCategory: '',
+            hasSavings: false,
+            tips: []
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Calculate summary data
+        const typedRecords = records as FinancialRecord[];
+        const incomeRecords = typedRecords.filter(record => record.type === 'income');
+        const expenseRecords = typedRecords.filter(record => record.type === 'expense');
+        
+        const totalIncome = incomeRecords.reduce((sum, record) => sum + record.amount, 0);
+        const totalExpense = expenseRecords.reduce((sum, record) => sum + record.amount, 0);
+        const balance = totalIncome - totalExpense;
+        
+        // Find top categories
+        const expenseCategories: Record<string, number> = {};
+        expenseRecords.forEach(record => {
+          expenseCategories[record.category] = (expenseCategories[record.category] || 0) + record.amount;
+        });
+        
+        const incomeCategories: Record<string, number> = {};
+        incomeRecords.forEach(record => {
+          incomeCategories[record.category] = (incomeCategories[record.category] || 0) + record.amount;
+        });
+        
+        const topExpenseCategory = Object.entries(expenseCategories)
+          .sort((a, b) => b[1] - a[1])
+          .map(([category]) => category)[0] || '';
+          
+        const topIncomeCategory = Object.entries(incomeCategories)
+          .sort((a, b) => b[1] - a[1])
+          .map(([category]) => category)[0] || '';
+        
+        // Generate tips based on data
+        const tips: string[] = [];
+        
+        if (balance < 0) {
+          tips.push(t('tips.spendingMoreThanEarning'));
+        }
+        
+        if (totalExpense > 0 && Object.keys(expenseCategories).length > 0) {
+          const topCategory = Object.entries(expenseCategories)
+            .sort((a, b) => b[1] - a[1])[0];
+          
+          const percentage = (topCategory[1] / totalExpense) * 100;
+          
+          if (percentage > 40) {
+            tips.push(t('tips.highExpenseCategory', { 
+              category: topCategory[0],
+              percentage: Math.round(percentage)
+            }));
+          }
+        }
+        
+        if (balance > 0) {
+          tips.push(t('tips.goodSavingHabits'));
+        }
+        
+        if (tips.length === 0) {
+          tips.push(t('tips.keepTracking'));
+        }
+        
+        setSummaryData({
+          recordCount: typedRecords.length,
+          totalIncome,
+          totalExpense,
+          balance,
+          topExpenseCategory,
+          topIncomeCategory,
+          hasSavings: balance > 0,
+          tips
+        });
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchSummaryData();
+  }, [userId, t]);
+  
+  if (isLoading) {
+    return (
+      <Container>
+        <Header onClick={toggleCollapse}>
+          <span>{t('summary')}</span>
+          <div title={t('expandSummary')}>
+            <ChevronDown size={18} className="toggle-icon" />
+          </div>
+        </Header>
+        <Content isCollapsed={false}>
+          <div>{t('loading')}</div>
+        </Content>
+      </Container>
+    );
+  }
+  
+  if (!summaryData || summaryData.recordCount < 3) {
+    return (
+      <Container>
+        <Header onClick={toggleCollapse}>
+          <span>{t('summary')}</span>
+          <div title={t('expandSummary')}>
+            <ChevronDown size={18} className="toggle-icon" />
+          </div>
+        </Header>
+        <Content isCollapsed={false}>
+          <NotEnoughData>
+            <AlertCircle size={32} />
+            <div className="title">{t('notEnoughData')}</div>
+            <div className="message">{t('keepRecordingMessage')}</div>
+          </NotEnoughData>
+        </Content>
+      </Container>
+    );
+  }
+  
+  return (
+    <Container>
+      <Header onClick={toggleCollapse}>
+        <span>{t('summary')}</span>
+        {isCollapsed ? (
+          <div title={t('expandSummary')}>
+            <ChevronDown size={18} className="toggle-icon" />
+          </div>
+        ) : (
+          <div title={t('collapseSummary')}>
+            <ChevronUp size={18} className="toggle-icon" />
+          </div>
+        )}
+      </Header>
+      <Content isCollapsed={isCollapsed}>
+        <SummaryGrid>
+          <SummaryItem>
+            <div className="label">{t('totalIncome')}</div>
+            <div className="value positive">
+              <TrendingUp size={16} />
+              ¥{summaryData.totalIncome.toFixed(2)}
+            </div>
+          </SummaryItem>
+          <SummaryItem>
+            <div className="label">{t('totalExpense')}</div>
+            <div className="value negative">
+              <TrendingDown size={16} />
+              ¥{summaryData.totalExpense.toFixed(2)}
+            </div>
+          </SummaryItem>
+          <SummaryItem>
+            <div className="label">{t('balance')}</div>
+            <div className={`value ${summaryData.balance >= 0 ? 'positive' : 'negative'}`}>
+              {summaryData.balance >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              ¥{Math.abs(summaryData.balance).toFixed(2)}
+            </div>
+          </SummaryItem>
+          <SummaryItem>
+            <div className="label">{t('recordCount')}</div>
+            <div className="value">
+              {summaryData.recordCount}
+            </div>
+          </SummaryItem>
+        </SummaryGrid>
+        
+        <TipsList>
+          <div className="title">{t('financialTips')}</div>
+          {summaryData.tips.map((tip, index) => (
+            <div key={index} className="tip">
+              <CheckCircle size={16} color="#53a867" />
+              <div className="text">{tip}</div>
+            </div>
+          ))}
+        </TipsList>
+      </Content>
+    </Container>
+  );
+} 

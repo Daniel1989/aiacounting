@@ -7,6 +7,7 @@ import { Icon } from '@/app/components/ui/icon';
 import { Overview } from './overview';
 import { PieChart } from './pie-chart';
 import { styled } from 'styled-components';
+import SummarySection from './summary-section';
 
 type TabType = 'overview' | 'cost' | 'income';
 
@@ -81,6 +82,7 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
   return (
     <div className="flex flex-col h-full">
       <Header>{dayjs(current).format('YYYY年MM月')}</Header>
+      <SummarySection userId={userId} locale={locale} />
       <TabHeader>
         {tabs.map((tab) => (
           <li 
