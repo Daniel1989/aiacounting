@@ -154,6 +154,8 @@
     "financialTips": "财务建议",
     "notEnoughData": "数据不足",
     "keepRecordingMessage": "继续记录您的支出和收入，以获取个性化的见解和建议。",
+    "aiAnalysisLoading": "正在分析您的财务数据...",
+    "aiAnalysisError": "无法生成个性化建议。以下是一些通用建议。",
     "tips": {
       "spendingMoreThanEarning": "您的支出超过了收入。考虑减少在主要支出类别上的花费。",
       "highExpenseCategory": "您的{{percentage}}%支出都在{{category}}类别。考虑是否可以减少这方面的支出。",

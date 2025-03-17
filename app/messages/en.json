@@ -145,20 +145,22 @@
     "nextDays": "Next 7 days",
     "expenseAnalysis": "Expense Analysis",
     "incomeAnalysis": "Income Analysis",
-    "totalItems": "{{count}} {{type}} items in total",
+    "totalItems": "{{count}} {{type}} records in total",
     "summary": "90-Day Summary",
-    "expandSummary": "Expand summary",
-    "collapseSummary": "Collapse summary",
+    "expandSummary": "Expand Summary",
+    "collapseSummary": "Collapse Summary",
     "balance": "Balance",
     "recordCount": "Total Records",
     "financialTips": "Financial Tips",
     "notEnoughData": "Not Enough Data",
-    "keepRecordingMessage": "Keep recording your expenses and income to see personalized insights and tips.",
+    "keepRecordingMessage": "Keep recording your expenses and income to get personalized insights and recommendations.",
+    "aiAnalysisLoading": "Analyzing your financial data...",
+    "aiAnalysisError": "Couldn't generate personalized tips. Here are some general recommendations instead.",
     "tips": {
-      "spendingMoreThanEarning": "You're spending more than you earn. Consider reducing expenses in your top spending categories.",
-      "highExpenseCategory": "{{percentage}}% of your expenses are in {{category}}. Consider if you can reduce spending in this area.",
-      "goodSavingHabits": "Great job! You're saving money. Keep up the good habits.",
-      "keepTracking": "Keep tracking your finances consistently to get more personalized insights."
+      "spendingMoreThanEarning": "You're spending more than you earn. Consider reducing expenses in your major spending categories.",
+      "highExpenseCategory": "{{percentage}}% of your spending is in the {{category}} category. Consider if you can reduce this expense.",
+      "goodSavingHabits": "Great job! You're saving money. Keep up these good habits.",
+      "keepTracking": "Continue tracking your finances to get more personalized insights."
     }
   },
   "wishlist": {

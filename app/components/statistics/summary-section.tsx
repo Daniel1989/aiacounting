@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 import { createClient } from '@/app/lib/supabase/client';
-import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 interface SummarySectionProps {
   userId: string;
@@ -20,6 +20,7 @@ interface SummaryData {
   topIncomeCategory: string;
   hasSavings: boolean;
   tips: string[];
+  isAiTips: boolean;
 }
 
 interface FinancialRecord {
@@ -115,12 +116,20 @@ const TipsList = styled.div`
   border-radius: 8px;
   padding: 16px;
   border-left: 4px solid #53a867;
+  overflow-y: auto;
+  max-height: 300px;
   
   > .title {
     font-size: 14px;
     font-weight: bold;
     margin-bottom: 12px;
     color: #53a867;
+    display: flex;
+    align-items: center;
+    
+    > svg {
+      margin-right: 6px;
+    }
   }
   
   > .tip {
@@ -184,6 +193,7 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoadingAiTips, setIsLoadingAiTips] = useState(false);
   
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -221,7 +231,8 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
             topExpenseCategory: '',
             topIncomeCategory: '',
             hasSavings: false,
-            tips: []
+            tips: [t('keepRecordingMessage')],
+            isAiTips: false
           });
           setIsLoading(false);
           return;
@@ -255,35 +266,7 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
           .sort((a, b) => b[1] - a[1])
           .map(([category]) => category)[0] || '';
         
-        // Generate tips based on data
-        const tips: string[] = [];
-        
-        if (balance < 0) {
-          tips.push(t('tips.spendingMoreThanEarning'));
-        }
-        
-        if (totalExpense > 0 && Object.keys(expenseCategories).length > 0) {
-          const topCategory = Object.entries(expenseCategories)
-            .sort((a, b) => b[1] - a[1])[0];
-          
-          const percentage = (topCategory[1] / totalExpense) * 100;
-          
-          if (percentage > 40) {
-            tips.push(t('tips.highExpenseCategory', { 
-              category: topCategory[0],
-              percentage: Math.round(percentage)
-            }));
-          }
-        }
-        
-        if (balance > 0) {
-          tips.push(t('tips.goodSavingHabits'));
-        }
-        
-        if (tips.length === 0) {
-          tips.push(t('tips.keepTracking'));
-        }
-        
+        // Set initial data with placeholder tips
         setSummaryData({
           recordCount: typedRecords.length,
           totalIncome,
@@ -292,8 +275,13 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
           topExpenseCategory,
           topIncomeCategory,
           hasSavings: balance > 0,
-          tips
+          tips: [t('tips.keepTracking')],
+          isAiTips: false
         });
+        
+        // Fetch AI tips
+        fetchAiTips(userId, locale);
+        
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -302,7 +290,43 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
     };
     
     fetchSummaryData();
-  }, [userId, t]);
+  }, [userId, locale, t]);
+  
+  const fetchAiTips = async (userId: string, locale: string) => {
+    try {
+      setIsLoadingAiTips(true);
+      
+      const response = await fetch(`/${locale}/api/analyze-statistics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, locale }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch AI tips');
+      }
+      
+      const data = await response.json();
+      
+      if (data.tips && data.tips.length > 0) {
+        setSummaryData(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            tips: data.tips,
+            isAiTips: true
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching AI tips:', error);
+      // Keep the existing tips if AI tips fetch fails
+    } finally {
+      setIsLoadingAiTips(false);
+    }
+  };
   
   if (isLoading) {
     return (
@@ -386,13 +410,22 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         </SummaryGrid>
         
         <TipsList>
-          <div className="title">{t('financialTips')}</div>
-          {summaryData.tips.map((tip, index) => (
-            <div key={index} className="tip">
-              <CheckCircle size={16} color="#53a867" />
-              <div className="text">{tip}</div>
+          <div className="title">
+            {summaryData.isAiTips && <Sparkles size={16} color="#53a867" />}
+            {t('financialTips')}
+          </div>
+          {isLoadingAiTips ? (
+            <div className="tip">
+              <div className="text">{t('aiAnalysisLoading')}</div>
             </div>
-          ))}
+          ) : (
+            summaryData.tips.map((tip, index) => (
+              <div key={index} className="tip">
+                <CheckCircle size={16} color="#53a867" />
+                <div className="text">{tip}</div>
+              </div>
+            ))
+          )}
         </TipsList>
       </Content>
     </Container>
