@@ -334,7 +334,7 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
   if (isLoading) {
     return (
       <Container>
-        <div>Loading...</div>
+        <div>{t('loading')}</div>
       </Container>
     );
   }

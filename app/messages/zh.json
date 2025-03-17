@@ -74,7 +74,8 @@
     "invalidAmount": "请输入有效金额",
     "notLoggedIn": "您必须登录才能添加记录",
     "addTag": "添加标签",
-    "tagAdded": "标签添加成功"
+    "tagAdded": "标签添加成功",
+    "recordAdded": "记录添加成功"
   },
   "qrCode": {
     "scanToAccess": "请使用手机扫描下面的二维码访问此页面",
@@ -164,6 +165,7 @@
     }
   },
   "wishlist": {
+    "loading": "加载中...",
     "title": "心愿",
     "subtitle": "设置和追踪你的目标",
     "travel": {

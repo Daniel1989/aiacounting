@@ -74,7 +74,8 @@
     "invalidAmount": "Please enter a valid amount",
     "notLoggedIn": "You must be logged in to add records",
     "addTag": "Add Tag",
-    "tagAdded": "Tag added successfully"
+    "tagAdded": "Tag added successfully",
+    "recordAdded": "Record added successfully"
   },
   "qrCode": {
     "scanToAccess": "Please scan the QR code below with your mobile phone to access this page",
@@ -164,6 +165,7 @@
     }
   },
   "wishlist": {
+    "loading": "Loading...",
     "title": "Wishlist",
     "subtitle": "Set and track your goals",
     "travel": {
@@ -174,7 +176,7 @@
       "title": "Shopping",
       "description": "Save for your desired items"
     },
-    "savings": {
+    "saving": {
       "title": "Savings",
       "description": "Build your financial future"
     },

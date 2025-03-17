@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/app/lib/supabase/client';
 import dayjs from 'dayjs';
 import { styled } from 'styled-components';
+import * as echarts from 'echarts';
 
 interface LineChartProps {
   userId: string;
@@ -29,17 +30,12 @@ const Wrapper = styled.div`
 
 const ChartWrapper = styled.div`
   position: relative;
-  height: 400px;
+  height: 300px;
+  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-`;
-
-const ChartSvg = styled.svg`
-  width: 100%;
-  height: 100%;
-  overflow: visible;
 `;
 
 const ChartLegend = styled.div`
@@ -93,6 +89,7 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
   const [index, setIndex] = useState(0);
   const count = 7; // Number of days to display
   const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
   const supabase = createClient();
   
   // Colors for the chart
@@ -191,6 +188,190 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
     setCurrentDate(new Date(date));
     setIndex(0);
   };
+
+  // Initialize and update ECharts
+  useEffect(() => {
+    // Initialize chart
+    if (chartRef.current) {
+      if (!chartInstance.current) {
+        chartInstance.current = echarts.init(chartRef.current);
+      }
+      
+      // Show loading state
+      if (isLoading) {
+        chartInstance.current.showLoading();
+        return;
+      } else {
+        chartInstance.current.hideLoading();
+      }
+      console.log(records);
+      // Set chart options
+      if (records.length > 0) {
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            formatter: function(params: any) {
+              const date = params[0].name;
+              let result = `${date}<br/>`;
+              
+              params.forEach((param: any) => {
+                const marker = `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${param.color};"></span>`;
+                const value = param.value || 0;
+                result += `${marker} ${param.seriesName}: ¥${value.toFixed(2)}<br/>`;
+              });
+              
+              return result;
+            }
+          },
+          legend: {
+            show: false
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            top: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: records.map(record => record.date),
+            axisLine: {
+              lineStyle: {
+                color: colors.grid
+              }
+            },
+            axisLabel: {
+              color: '#666'
+            }
+          },
+          yAxis: {
+            type: 'value',
+            axisLine: {
+              show: false
+            },
+            axisTick: {
+              show: false
+            },
+            splitLine: {
+              lineStyle: {
+                color: colors.grid,
+                type: 'dashed'
+              }
+            },
+            axisLabel: {
+              color: '#666',
+              formatter: (value: number) => {
+                return value.toFixed(0);
+              }
+            }
+          },
+          series: [
+            {
+              name: t('income'),
+              type: 'line',
+              stack: 'Total',
+              data: records.map(record => record.income),
+              symbol: 'circle',
+              symbolSize: 8,
+              itemStyle: {
+                color: colors.income
+              },
+              lineStyle: {
+                width: 2,
+                color: colors.income
+              },
+              areaStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [
+                    {
+                      offset: 0,
+                      color: 'rgba(51, 51, 51, 0.2)'
+                    },
+                    {
+                      offset: 1,
+                      color: 'rgba(51, 51, 51, 0)'
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              name: t('expense'),
+              type: 'line',
+              stack: 'Total',
+              data: records.map(record => record.expense),
+              symbol: 'circle',
+              symbolSize: 8,
+              itemStyle: {
+                color: colors.expense
+              },
+              lineStyle: {
+                width: 2,
+                color: colors.expense
+              },
+              areaStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [
+                    {
+                      offset: 0,
+                      color: 'rgba(245, 108, 108, 0.2)'
+                    },
+                    {
+                      offset: 1,
+                      color: 'rgba(245, 108, 108, 0)'
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        };
+        
+        chartInstance.current.setOption(option);
+      }
+    }
+    
+    // Cleanup
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.dispose();
+        chartInstance.current = null;
+      }
+    };
+  }, [records, isLoading, t]);
+  
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartInstance.current) {
+        chartInstance.current.resize();
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Force resize after a short delay to ensure the container has proper dimensions
+    const timer = setTimeout(() => {
+      handleResize();
+    }, 200);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
   
   if (isLoading) {
     return <NoData>{t('loading')}</NoData>;
@@ -199,34 +380,6 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
   if (records.length === 0) {
     return <NoData>{t('noData')}</NoData>;
   }
-  
-  // Calculate max value for y-axis scale
-  const maxIncome = Math.max(...records.map(r => r.income));
-  const maxExpense = Math.max(...records.map(r => r.expense));
-  const maxValue = Math.max(maxIncome, maxExpense);
-  const yAxisMax = maxValue === 0 ? 100 : Math.ceil(maxValue / 1000) * 1000;
-  
-  // Calculate chart dimensions
-  const chartWidth = 100;
-  const chartHeight = 100;
-  const padding = { top: 10, right: 10, bottom: 20, left: 10 };
-  
-  // Generate y-axis ticks
-  const yAxisTicks = [];
-  const numTicks = 5;
-  for (let i = 0; i <= numTicks; i++) {
-    yAxisTicks.push(yAxisMax * i / numTicks);
-  }
-  
-  // Generate points for the line
-  const generatePoints = (key: 'income' | 'expense') => {
-    const points = records.map((record, i) => {
-      const x = padding.left + (chartWidth - padding.left - padding.right) * i / (records.length - 1);
-      const y = chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * record[key] / yAxisMax;
-      return `${x},${y}`;
-    });
-    return points.join(' ');
-  };
   
   return (
     <Wrapper>
@@ -241,84 +394,7 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
         </LegendItem>
       </ChartLegend>
       
-      <ChartWrapper ref={chartRef}>
-        <ChartSvg viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
-          {/* Y-axis grid lines */}
-          {yAxisTicks.map((tick, i) => (
-            <g key={`y-tick-${i}`}>
-              <line
-                x1={padding.left}
-                y1={chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * tick / yAxisMax}
-                x2={chartWidth - padding.right}
-                y2={chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * tick / yAxisMax}
-                stroke={colors.grid}
-                strokeWidth="0.5"
-              />
-              <text
-                x={0}
-                y={chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * tick / yAxisMax}
-                fontSize="3"
-                textAnchor="start"
-                dominantBaseline="middle"
-              >
-                {tick}
-              </text>
-            </g>
-          ))}
-          
-          {/* X-axis labels */}
-          {records.map((record, i) => (
-            <text
-              key={`x-label-${i}`}
-              x={padding.left + (chartWidth - padding.left - padding.right) * i / (records.length - 1)}
-              y={chartHeight - padding.bottom / 2}
-              fontSize="3"
-              textAnchor="middle"
-              dominantBaseline="middle"
-            >
-              {record.date}
-            </text>
-          ))}
-          
-          {/* Income line */}
-          <polyline
-            points={generatePoints('income')}
-            fill="none"
-            stroke={colors.income}
-            strokeWidth="0.5"
-          />
-          
-          {/* Income points */}
-          {records.map((record, i) => (
-            <circle
-              key={`income-point-${i}`}
-              cx={padding.left + (chartWidth - padding.left - padding.right) * i / (records.length - 1)}
-              cy={chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * record.income / yAxisMax}
-              r="1"
-              fill={colors.income}
-            />
-          ))}
-          
-          {/* Expense line */}
-          <polyline
-            points={generatePoints('expense')}
-            fill="none"
-            stroke={colors.expense}
-            strokeWidth="0.5"
-          />
-          
-          {/* Expense points */}
-          {records.map((record, i) => (
-            <circle
-              key={`expense-point-${i}`}
-              cx={padding.left + (chartWidth - padding.left - padding.right) * i / (records.length - 1)}
-              cy={chartHeight - padding.bottom - (chartHeight - padding.top - padding.bottom) * record.expense / yAxisMax}
-              r="1"
-              fill={colors.expense}
-            />
-          ))}
-        </ChartSvg>
-      </ChartWrapper>
+      <ChartWrapper ref={chartRef} style={{ minHeight: '300px' }} />
       
       <ButtonWrapper>
         <button onClick={getPrevData}>{t('previousDays', { count })}</button>
