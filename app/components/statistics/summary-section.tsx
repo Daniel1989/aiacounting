@@ -23,12 +23,21 @@ interface SummaryData {
   isAiTips: boolean;
 }
 
+interface Tag {
+  id: string;
+  name: string;
+  category: 'income' | 'cost';
+  icon: string;
+}
+
 interface FinancialRecord {
   id: string;
   user_id: string;
   amount: number;
   type: 'income' | 'expense';
   category: string;
+  tag_id: string;
+  tags: Tag;
   date: string;
   description?: string;
   created_at: string;
@@ -205,13 +214,21 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         setIsLoading(true);
         const supabase = createClient();
         
-        // Get last 90 days of records
+        // Get last 90 days of records with tag information
         const ninetyDaysAgo = new Date();
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
         
         const { data: records, error } = await supabase
           .from('records')
-          .select('*')
+          .select(`
+            *,
+            tags:tag_id (
+              id,
+              category,
+              name,
+              icon
+            )
+          `)
           .eq('user_id', userId)
           .gte('updated_at', ninetyDaysAgo.toISOString())
           .order('updated_at', { ascending: false });
@@ -238,10 +255,16 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
           return;
         }
         
+        // Process records with tag information
+        const processedRecords = records.map(record => ({
+          ...record,
+          category: record.tags?.category || 'unknown',
+          tagName: record.tags?.name || 'unknown'
+        }));
+        
         // Calculate summary data
-        const typedRecords = records as FinancialRecord[];
-        const incomeRecords = typedRecords.filter(record => record.type === 'income');
-        const expenseRecords = typedRecords.filter(record => record.type === 'expense');
+        const incomeRecords = processedRecords.filter(record => record.category === 'income');
+        const expenseRecords = processedRecords.filter(record => record.category === 'cost');
         
         const totalIncome = incomeRecords.reduce((sum, record) => sum + record.amount, 0);
         const totalExpense = expenseRecords.reduce((sum, record) => sum + record.amount, 0);
@@ -250,12 +273,12 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         // Find top categories
         const expenseCategories: Record<string, number> = {};
         expenseRecords.forEach(record => {
-          expenseCategories[record.category] = (expenseCategories[record.category] || 0) + record.amount;
+          expenseCategories[record.name] = (expenseCategories[record.name] || 0) + record.amount;
         });
         
         const incomeCategories: Record<string, number> = {};
         incomeRecords.forEach(record => {
-          incomeCategories[record.category] = (incomeCategories[record.category] || 0) + record.amount;
+          incomeCategories[record.name] = (incomeCategories[record.name] || 0) + record.amount;
         });
         
         const topExpenseCategory = Object.entries(expenseCategories)
@@ -268,7 +291,7 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         
         // Set initial data with placeholder tips
         setSummaryData({
-          recordCount: typedRecords.length,
+          recordCount: processedRecords.length,
           totalIncome,
           totalExpense,
           balance,

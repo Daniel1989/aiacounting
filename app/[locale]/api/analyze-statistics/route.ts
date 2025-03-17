@@ -24,13 +24,21 @@ export async function POST(request: NextRequest) {
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Get last 90 days of records
+    // Get last 90 days of records with tag information
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     
     const { data: records, error } = await supabase
       .from('records')
-      .select('*')
+      .select(`
+        *,
+        tags:tag_id (
+          id,
+          name,
+          icon,
+          category
+        )
+      `)
       .eq('user_id', userId)
       .gte('updated_at', ninetyDaysAgo.toISOString())
       .order('updated_at', { ascending: false });
@@ -50,9 +58,16 @@ export async function POST(request: NextRequest) {
       });
     }
     
+    // Process records with tag information
+    const processedRecords = records.map(record => ({
+      ...record,
+      category: record.tags?.category || 'unknown',
+      tagName: record.tags?.name || 'unknown'
+    }));
+    
     // Calculate basic statistics for context
-    const incomeRecords = records.filter(record => record.category === 'income');
-    const expenseRecords = records.filter(record => record.category === 'cost');
+    const incomeRecords = processedRecords.filter(record => record.category === 'income');
+    const expenseRecords = processedRecords.filter(record => record.category === 'cost');
     
     const totalIncome = incomeRecords.reduce((sum, record) => sum + record.amount, 0);
     const totalExpense = expenseRecords.reduce((sum, record) => sum + record.amount, 0);
@@ -61,13 +76,13 @@ export async function POST(request: NextRequest) {
     // Group expenses by category
     const expenseCategories: Record<string, number> = {};
     expenseRecords.forEach(record => {
-      expenseCategories[record.category] = (expenseCategories[record.category] || 0) + record.amount;
+      expenseCategories[record.name] = (expenseCategories[record.name] || 0) + record.amount;
     });
     
     // Group income by category
     const incomeCategories: Record<string, number> = {};
     incomeRecords.forEach(record => {
-      incomeCategories[record.category] = (incomeCategories[record.category] || 0) + record.amount;
+      incomeCategories[record.name] = (incomeCategories[record.name] || 0) + record.amount;
     });
     
     // Prepare data for AI analysis
@@ -75,19 +90,19 @@ export async function POST(request: NextRequest) {
       totalIncome,
       totalExpense,
       balance,
-      recordCount: records.length,
+      recordCount: processedRecords.length,
       expenseCategories: Object.entries(expenseCategories)
         .map(([category, amount]) => ({ 
           category, 
           amount,
-          percentage: (amount / totalExpense) * 100
+          percentage: totalExpense > 0 ? (amount / totalExpense) * 100 : 0
         }))
         .sort((a, b) => b.amount - a.amount),
       incomeCategories: Object.entries(incomeCategories)
         .map(([category, amount]) => ({ 
           category, 
           amount,
-          percentage: (amount / totalIncome) * 100
+          percentage: totalIncome > 0 ? (amount / totalIncome) * 100 : 0
         }))
         .sort((a, b) => b.amount - a.amount),
       hasSavings: balance > 0,
