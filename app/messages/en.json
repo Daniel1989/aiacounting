@@ -145,7 +145,7 @@
     "nextDays": "Next 7 days",
     "expenseAnalysis": "Expense Analysis",
     "incomeAnalysis": "Income Analysis",
-    "totalItems": "{{count}} {{type}} records in total",
+    "totalItems": "{count} {type} records in total",
     "summary": "90-Day Summary",
     "expandSummary": "Expand Summary",
     "collapseSummary": "Collapse Summary",
@@ -158,7 +158,7 @@
     "aiAnalysisError": "Couldn't generate personalized tips. Here are some general recommendations instead.",
     "tips": {
       "spendingMoreThanEarning": "You're spending more than you earn. Consider reducing expenses in your major spending categories.",
-      "highExpenseCategory": "{{percentage}} of your spending is in the {{category}} category. Consider if you can reduce this expense.",
+      "highExpenseCategory": "{percentage} of your spending is in the {category} category. Consider if you can reduce this expense.",
       "goodSavingHabits": "Great job! You're saving money. Keep up these good habits.",
       "keepTracking": "Continue tracking your finances to get more personalized insights."
     }
@@ -235,6 +235,6 @@
     "saveRecords": "Save Records",
     "notAReceipt": "This is not an image of a receipt or bill. Please upload an image containing expense or income information.",
     "noItemsSelected": "No items selected. Please select at least one item to save.",
-    "recordsSaved": "{{count}} records saved successfully!"
+    "recordsSaved": "{count} records saved successfully!"
   }
 } 

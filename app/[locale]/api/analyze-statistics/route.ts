@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
     // Group expenses by category
     const expenseCategories: Record<string, number> = {};
     expenseRecords.forEach(record => {
-      expenseCategories[record.name] = (expenseCategories[record.name] || 0) + record.amount;
+      expenseCategories[record.tagName] = (expenseCategories[record.tagName] || 0) + record.amount;
     });
     
     // Group income by category
     const incomeCategories: Record<string, number> = {};
     incomeRecords.forEach(record => {
-      incomeCategories[record.name] = (incomeCategories[record.name] || 0) + record.amount;
+      incomeCategories[record.tagName] = (incomeCategories[record.tagName] || 0) + record.amount;
     });
     
     // Prepare data for AI analysis
@@ -165,8 +165,8 @@ export async function POST(request: NextRequest) {
         const topCategory = financialData.expenseCategories[0];
         if (topCategory.percentage > 40) {
           tips.push(t('tips.highExpenseCategory', { 
-            category: topCategory.category,
-            percentage: Math.round(topCategory.percentage)
+            percentage: Math.round(topCategory.percentage),
+            category: topCategory.category
           }));
         }
       }

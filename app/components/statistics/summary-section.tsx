@@ -273,12 +273,12 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         // Find top categories
         const expenseCategories: Record<string, number> = {};
         expenseRecords.forEach(record => {
-          expenseCategories[record.name] = (expenseCategories[record.name] || 0) + record.amount;
+          expenseCategories[record.tagName] = (expenseCategories[record.tagName] || 0) + record.amount;
         });
         
         const incomeCategories: Record<string, number> = {};
         incomeRecords.forEach(record => {
-          incomeCategories[record.name] = (incomeCategories[record.name] || 0) + record.amount;
+          incomeCategories[record.tagName] = (incomeCategories[record.tagName] || 0) + record.amount;
         });
         
         const topExpenseCategory = Object.entries(expenseCategories)

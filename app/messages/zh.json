@@ -145,7 +145,7 @@
     "nextDays": "往后7天",
     "expenseAnalysis": "支出分析",
     "incomeAnalysis": "收入分析",
-    "totalItems": "共{{count}}条{{type}}记录",
+    "totalItems": "共{count}条{type}记录",
     "summary": "90天总结",
     "expandSummary": "展开总结",
     "collapseSummary": "收起总结",
@@ -158,7 +158,7 @@
     "aiAnalysisError": "无法生成个性化建议。以下是一些通用建议。",
     "tips": {
       "spendingMoreThanEarning": "您的支出超过了收入。考虑减少在主要支出类别上的花费。",
-      "highExpenseCategory": "您的{{percentage}}支出都在{{category}}类别。考虑是否可以减少这方面的支出。",
+      "highExpenseCategory": "您的{percentage}%支出都在{category}类别。考虑是否可以减少这方面的支出。",
       "goodSavingHabits": "做得好！您正在存钱。保持这些好习惯。",
       "keepTracking": "持续跟踪您的财务状况，以获取更多个性化的见解。"
     }
@@ -174,7 +174,7 @@
       "title": "购物",
       "description": "为心仪的物品储蓄"
     },
-    "savings": {
+    "saving": {
       "title": "储蓄",
       "description": "构建你的财务未来"
     },
@@ -235,6 +235,6 @@
     "saveRecords": "保存记录",
     "notAReceipt": "这不是一张收据或账单的图片。请上传包含费用或收入信息的图片。",
     "noItemsSelected": "未选择任何项目。请至少选择一个项目进行保存。",
-    "recordsSaved": "成功保存 {{count}} 条记录！"
+    "recordsSaved": "成功保存 {count} 条记录！"
   }
 } 
