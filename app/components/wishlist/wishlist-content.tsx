@@ -77,17 +77,17 @@ const GoalCard = styled.div`
     justify-content: center;
     
     &.travel {
-      background: #4a90e2;
+      background: #53a867;
       color: white;
     }
     
     &.shopping {
-      background: #9b59b6;
+      background: #6bbf7b;
       color: white;
     }
     
     &.savings {
-      background: #2ecc71;
+      background: #478c58;
       color: white;
     }
   }
@@ -117,7 +117,7 @@ const PlanStatusContainer = styled.div`
 `;
 
 const PlanHeader = styled.div`
-  background: #000;
+  background: #53a867;
   color: white;
   padding: 16px;
   text-align: center;
@@ -148,7 +148,7 @@ const PlanSection = styled.div`
     
     > .progress-bar {
       height: 100%;
-      background: #4a90e2;
+      background: #53a867;
       border-radius: 4px;
     }
   }
@@ -171,7 +171,7 @@ const PlanSection = styled.div`
     
     > .icon {
       margin-right: 8px;
-      color: #2ecc71;
+      color: #53a867;
     }
     
     > .text {
@@ -197,7 +197,7 @@ const PlanSection = styled.div`
       font-weight: bold;
       
       &.saving {
-        color: #2ecc71;
+        color: #53a867;
       }
     }
     
@@ -221,15 +221,23 @@ const ActionButtons = styled.div`
     cursor: pointer;
     
     &.primary {
-      background: #000;
+      background: #53a867;
       color: white;
       border: none;
+      
+      &:hover {
+        background: #478c58;
+      }
     }
     
     &.secondary {
       background: white;
-      color: #000;
-      border: 1px solid #000;
+      color: #53a867;
+      border: 2px solid #53a867;
+      
+      &:hover {
+        background: #f0f9f2;
+      }
     }
   }
 `;
@@ -286,8 +294,8 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
     {
       id: 'savings',
       icon: <PiggyBank size={24} />,
-      title: t('savings.title'),
-      description: t('savings.description'),
+      title: t('saving.title'),
+      description: t('saving.description'),
     },
   ];
   

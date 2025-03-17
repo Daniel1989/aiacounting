@@ -3,7 +3,6 @@ import { getCurrentUser } from '@/app/lib/server';
 import { UserProfileSettings } from '@/app/components/settings/user-profile-settings';
 import { LegalLinks } from '@/app/components/settings/legal-links';
 import { LogoutButton } from '@/app/components/auth/logout-button';
-import { TagManagement } from '@/app/components/settings/tag-management';
 import { DbUser } from '@/app/lib/supabase/database';
 
 interface SettingsPageProps {
@@ -36,14 +35,6 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         <h2 className="text-xl font-semibold mb-4">{t('profile')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
           <UserProfileSettings userId={userId} user={null} />
-        </div>
-      </section>
-      
-      {/* Tags Management Section */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">{t('tagsManagement')}</h2>
-        <div className="bg-white rounded-lg shadow p-6">
-          <TagManagement userId={userId} locale={locale} />
         </div>
       </section>
       

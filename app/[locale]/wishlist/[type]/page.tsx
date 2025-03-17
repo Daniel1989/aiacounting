@@ -4,17 +4,17 @@ import { createClient } from '@/app/lib/supabase/server';
 import GoalSettingForm from '@/app/components/wishlist/goal-setting-form';
 
 interface GoalSettingPageProps {
-  params: {
+  params: Promise<{
     locale: string;
     type: string;
-  };
+  }>;
   searchParams: {
     edit?: string;
   };
 }
 
 export async function generateMetadata(props: GoalSettingPageProps) {
-  const { params } = props;
+  const params = await props.params;
   const t = await getTranslations('wishlist');
   
   // Get the type from params and use it to determine the title suffix
@@ -34,7 +34,8 @@ export async function generateMetadata(props: GoalSettingPageProps) {
 }
 
 export default async function GoalSettingPage(props: GoalSettingPageProps) {
-  const { params, searchParams } = props;
+  const params = await props.params;
+  const { searchParams } = props;
   const { locale, type } = params;
   const { edit } = searchParams;
   

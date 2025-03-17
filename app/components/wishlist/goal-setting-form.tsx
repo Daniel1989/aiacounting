@@ -91,7 +91,7 @@ const FormGroup = styled.div`
 const SubmitButton = styled.button`
   width: 100%;
   padding: 16px;
-  background: #000;
+  background: #53a867;
   color: white;
   border: none;
   border-radius: 8px;
@@ -99,6 +99,10 @@ const SubmitButton = styled.button`
   font-weight: bold;
   cursor: pointer;
   margin-top: auto;
+  
+  &:hover {
+    background: #478c58;
+  }
   
   &:disabled {
     background: #ccc;
@@ -118,7 +122,7 @@ const LoadingContainer = styled.div`
     width: 48px;
     height: 48px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #000;
+    border-top: 4px solid #53a867;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 24px;
@@ -234,15 +238,23 @@ const ActionButtons = styled.div`
     cursor: pointer;
     
     &.primary {
-      background: #000;
+      background: #53a867;
       color: white;
       border: none;
+      
+      &:hover {
+        background: #478c58;
+      }
     }
     
     &.secondary {
       background: white;
-      color: #000;
-      border: 1px solid #000;
+      color: #53a867;
+      border: 2px solid #53a867;
+      
+      &:hover {
+        background: #f0f9f2;
+      }
     }
   }
 `;

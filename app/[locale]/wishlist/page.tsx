@@ -4,12 +4,13 @@ import { createClient } from '@/app/lib/supabase/server';
 import WishlistContent from '@/app/components/wishlist/wishlist-content';
 
 interface WishlistPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params: { locale } }: WishlistPageProps) {
+export async function generateMetadata({ params }: WishlistPageProps) {
+  const { locale } = await params;
   const t = await getTranslations('wishlist');
   
   return {
@@ -17,7 +18,8 @@ export async function generateMetadata({ params: { locale } }: WishlistPageProps
   };
 }
 
-export default async function WishlistPage({ params: { locale } }: WishlistPageProps) {
+export default async function WishlistPage({ params }: WishlistPageProps) {
+  const { locale } = await params;
   const supabase = await createClient();
   
   const { data: { user }, error } = await supabase.auth.getUser();
