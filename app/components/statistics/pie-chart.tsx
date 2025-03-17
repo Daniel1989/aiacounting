@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/app/lib/supabase/client';
 import dayjs from 'dayjs';
 import { styled } from 'styled-components';
-import { Icon } from '@/app/components/ui/icon';
+import { Icon } from '@/app/components/ui/icon-component';
 import * as echarts from 'echarts';
 
 interface PieChartProps {

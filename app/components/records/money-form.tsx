@@ -9,7 +9,7 @@ import { TagsSection } from './tags-section';
 import { NoteSection } from './note-section';
 import { NumberPadSection } from './number-pad-section';
 import { toast } from 'sonner';
-import { iconFileMap } from '@/app/components/ui/icon';
+import { iconFileMap } from '@/app/components/ui/icon-component';
 
 // Default tag names for filtering
 const DEFAULT_COST_TAGS = ['房租', '水电', '交通', '学校', '日用', '餐饮', '购物', '娱乐', '旅游', '电影', '宠物'];

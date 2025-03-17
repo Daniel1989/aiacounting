@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import dayjs from 'dayjs';
-import { Icon } from '@/app/components/ui/icon';
+import { Icon } from '@/app/components/ui/icon-component';
 import { Overview } from './overview';
 import { PieChart } from './pie-chart';
 import { styled } from 'styled-components';

@@ -145,4 +145,4 @@ export function Icon({ name, className, size = 40 }: IconProps) {
   return null;
 } 
 
-export default Icon;
+export default Icon; 

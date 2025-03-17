@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { createClient } from '@/app/lib/supabase/client';
 import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
-import { Icon } from '../ui/icon';
+import { Icon } from '@/app/components/ui/icon-component';
 
 interface RecordItem {
   id: string;

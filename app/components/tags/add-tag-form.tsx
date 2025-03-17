@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 import { toast } from 'sonner';
 import { ArrowLeft, Check } from 'lucide-react';
-import { Icon, iconFileMap } from '@/app/components/ui/icon';
+import { Icon, iconFileMap } from '@/app/components/ui/icon-component';
 
 // Category name mapping
 const CATEGORY_NAME_MAP: Record<string, string> = {

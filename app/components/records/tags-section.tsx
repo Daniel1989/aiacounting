@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
-import { Icon, iconFileMap } from '@/app/components/ui/icon';
+import { Icon, iconFileMap } from '@/app/components/ui/icon-component';
 import { Plus } from 'lucide-react';
 
 interface Tag {
