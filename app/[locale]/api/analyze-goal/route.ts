@@ -6,6 +6,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const deepseek = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://ark.cn-beijing.volces.com/api/v3/bots',
+});
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -15,8 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { type, targetAmount, monthlyIncome, description } = await request.json();
-    const { locale } = await request.json();
+    const { locale, type, targetAmount, monthlyIncome, description, useStream, context } = await request.json();
     
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
@@ -32,6 +36,7 @@ export async function POST(request: Request) {
     if (recordsError) {
       return NextResponse.json({ error: 'Failed to fetch records' }, { status: 500 });
     }
+    
     // Calculate spending patterns
     const totalExpenses = records
       .filter(record => record.type === 'expense')
@@ -55,8 +60,16 @@ export async function POST(request: Request) {
     const language = locale === 'zh' ? 'Chinese' : 'English';
     
     // Prepare the prompt for OpenAI
-    const prompt = `As a financial advisor, analyze this user's goal and spending patterns. 
-Respond in ${language} language.
+    let prompt;
+    
+    if (context) {
+      // If context is provided, use it for better analysis
+      prompt = `You are a financial planning assistant. 
+You've been given a raw analysis output about a user's financial goal.
+Using this raw output as context, create a structured financial plan.
+
+Raw analysis:
+${context}
 
 Goal Type: ${type}
 ${targetAmount ? `Target Amount: ${targetAmount}` : ''}
@@ -68,17 +81,7 @@ Current Financial Status:
 - Average Daily Expenses: ${avgDailyExpense.toFixed(2)}
 - Last 90 Days Total Expenses: ${totalExpenses.toFixed(2)}
 
-Detailed spending breakdown:
-${breakdownText}
-
-Please provide:
-1. Estimated time to achieve the goal (in days)
-2. Recommended daily savings amount
-3. Specific suggestions to reduce expenses based on their spending patterns
-4. List of actionable steps to achieve the goal faster
-5. Potential challenges and how to overcome them
-
-Format the response in JSON with the following structure:
+Please organize this information into a structured JSON format with the following structure:
 {
   "timeToGoal": number,
   "dailySavings": number,
@@ -87,44 +90,98 @@ Format the response in JSON with the following structure:
   "challenges": [{"challenge": string, "solution": string}]
 }
 
+Ensure the output is valid JSON and in ${language} language.`;
+    } else {
+      // Regular prompt without context
+      prompt = `As a financial advisor, analyze this user's goal. 
+Respond in ${language} language.
+
+Goal Type: ${type}
+Goal Description: ${description}
+
+Please provide:
+1. list all detail expenses to achieve the goal
+2. suggest other similar alternative destinations that are more affordable.
+
 Remember to respond in ${language} language.`;
-
-    const completion = await openai.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-4-turbo-preview",
-      response_format: { type: "json_object" },
-    });
-
-    const content = completion.choices[0].message.content;
-    if (!content) {
-      throw new Error('No content in OpenAI response');
     }
-    
-    const analysis = JSON.parse(content);
-    
-    // Store the analysis result
-    const { error: analysisError } = await supabase
-      .from('goal_analyses')
-      .insert({
-        user_id: user.id,
-        goal_type: type,
-        target_amount: targetAmount,
-        monthly_income: monthlyIncome,
-        time_to_goal: analysis.timeToGoal,
-        daily_savings: analysis.dailySavings,
-        suggestions: analysis.suggestions,
-        actionable_steps: analysis.actionableSteps,
-        challenges: analysis.challenges,
-        created_at: new Date().toISOString()
+
+    // Use streaming response - just stream the raw output without parsing
+    if (useStream) {
+      const encoder = new TextEncoder();
+      const customReadable = new ReadableStream({
+        async start(controller) {
+          try {
+            // Use a different model for streaming if needed
+            const streamingModel = "bot-20250218193443-c7vhp";
+            
+            const completion = await deepseek.chat.completions.create({
+              messages: [{ role: "user", content: prompt }],
+              model: streamingModel,
+              stream: true,
+            });
+            
+            for await (const chunk of completion) {
+              const content = chunk.choices[0]?.delta?.content || '';
+              
+              // Send the chunk to the client
+              controller.enqueue(encoder.encode(`data: ${content}\n\n`));
+            }
+            
+            // Stream complete, close the controller
+            controller.close();
+          } catch (error) {
+            console.error('Streaming error:', error);
+            controller.error(error);
+          }
+        }
       });
+      
+      return new Response(customReadable, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    } else {
+      // Regular API call without streaming - use the original implementation
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "gpt-4-turbo-preview",
+        response_format: { type: "json_object" },
+      });
+      
+      const content = completion.choices[0].message.content;
+      if (!content) {
+        throw new Error('No content in OpenAI response');
+      }
+      
+      const analysis = JSON.parse(content);
+      
+      // Store the analysis result
+      const { error: analysisError } = await supabase
+        .from('goal_analyses')
+        .insert({
+          user_id: user.id,
+          goal_type: type,
+          target_amount: targetAmount,
+          monthly_income: monthlyIncome,
+          time_to_goal: analysis.timeToGoal,
+          daily_savings: analysis.dailySavings,
+          suggestions: analysis.suggestions,
+          actionable_steps: analysis.actionableSteps,
+          challenges: analysis.challenges,
+          created_at: new Date().toISOString()
+        });
 
-    if (analysisError) {
-      console.error('Error storing analysis:', analysisError);
+      if (analysisError) {
+        console.error('Error storing analysis:', analysisError);
+      }
+      
+      return NextResponse.json(analysis);
     }
-    
-    return NextResponse.json(analysis);
   } catch (error) {
-    console.log('Error:', error);
     console.error('Analysis error:', error);
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }

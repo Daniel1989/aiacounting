@@ -139,9 +139,75 @@ const LoadingContainer = styled.div`
     color: #666;
   }
   
+  > .streaming-container {
+    margin-top: 32px;
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
+    
+    > .stream-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      > .streaming-indicator {
+        color: #53a867;
+        font-size: 14px;
+        font-weight: normal;
+        display: flex;
+        align-items: center;
+        
+        > .dot {
+          width: 6px;
+          height: 6px;
+          background: #53a867;
+          border-radius: 50%;
+          margin-right: 6px;
+          animation: pulse 1.5s infinite;
+        }
+      }
+    }
+    
+    > .stream-content {
+      background: #f5f5f5;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      
+      &::after {
+        content: '|';
+        display: inline-block;
+        color: #53a867;
+        animation: blink 1s infinite;
+      }
+    }
+  }
+  
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.6; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.6; transform: scale(0.8); }
   }
 `;
 
@@ -264,12 +330,15 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isProcessingFinal, setIsProcessingFinal] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [formData, setFormData] = useState({
     targetAmount: '',
     monthlyIncome: '',
     description: ''
   });
+  const [streamedResponse, setStreamedResponse] = useState<string>('');
+  const [streamComplete, setStreamComplete] = useState(false);
   
   // Initialize form with existing goal data if available
   useEffect(() => {
@@ -301,9 +370,12 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
     try {
       setIsSubmitting(true);
       setIsAnalyzing(true);
+      setStreamedResponse('');
+      setStreamComplete(false);
+      setIsProcessingFinal(false);
       
-      // Start AI analysis
-      const response = await fetch(`/${locale}/api/analyze-goal`, {
+      // Step 1: Start AI analysis with event-stream for raw output
+      const streamResponse = await fetch(`/${locale}/api/analyze-goal`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,21 +385,91 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
           monthlyIncome: parseFloat(formData.monthlyIncome),
           description: formData.description,
+          useStream: true, // Enable streaming
         }),
       });
       
-      if (!response.ok) {
-        throw new Error('Analysis failed');
+      if (!streamResponse.ok) {
+        throw new Error('Stream analysis failed');
       }
       
-      const analysisResult = await response.json();
-      setAnalysis(analysisResult);
+      // Process the event stream to collect raw LLM output
+      let rawLlmOutput = '';
+      if (streamResponse.headers.get('Content-Type')?.includes('text/event-stream')) {
+        const reader = streamResponse.body?.getReader();
+        const decoder = new TextDecoder();
+        
+        // Process the event stream
+        if (reader) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              
+              if (done) {
+                setStreamComplete(true);
+                break;
+              }
+              
+              // Decode the chunk
+              const chunk = decoder.decode(value, { stream: true });
+              
+              // Process each line in the chunk
+              const lines = chunk.split('\n\n');
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.substring(6);
+                  rawLlmOutput += data;
+                  setStreamedResponse(prev => prev + data);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error reading stream:', error);
+            toast.error(t('errorStreamAnalysis'));
+          }
+        }
+      }
+      
+      // Step 2: Use the original API with the raw LLM output as context
+      if (rawLlmOutput) {
+        setIsProcessingFinal(true);
+        
+        const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type,
+            targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+            monthlyIncome: parseFloat(formData.monthlyIncome),
+            description: formData.description,
+            context: rawLlmOutput, // Use the raw LLM output as context
+          }),
+        });
+        
+        if (!finalResponse.ok) {
+          throw new Error('Final analysis failed');
+        }
+        
+        const analysisResult = await finalResponse.json();
+        setAnalysis(analysisResult);
+        setIsProcessingFinal(false);
+      } else {
+        throw new Error('No raw output obtained from stream');
+      }
+      
       setIsAnalyzing(false);
       
     } catch (error) {
       console.error('Error:', error);
-      toast.error(t('errorAnalyzing'));
+      if ((error as Error).message === 'Final analysis failed') {
+        toast.error(t('errorFinalAnalysis'));
+      } else {
+        toast.error(t('errorAnalyzing'));
+      }
       setIsAnalyzing(false);
+      setIsProcessingFinal(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -397,8 +539,31 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       <Container>
         <LoadingContainer>
           <div className="spinner" />
-          <div className="text">{t('analyzing')}</div>
-          <div className="subtext">{t('analyzingDescription')}</div>
+          <div className="text">
+            {isProcessingFinal ? t('processingFinalAnalysis') : t('analyzing')}
+          </div>
+          <div className="subtext">
+            {isProcessingFinal 
+              ? t('analyzingDescription') 
+              : t('analyzingDescription')}
+          </div>
+          
+          {streamedResponse && (
+            <div className="streaming-container">
+              <div className="stream-title">
+                <span>{t('rawResponse')}</span>
+                {!streamComplete && (
+                  <span className="streaming-indicator">
+                    <span className="dot"></span>
+                    {t('streaming')}
+                  </span>
+                )}
+              </div>
+              <pre className="stream-content">
+                {streamedResponse}
+              </pre>
+            </div>
+          )}
         </LoadingContainer>
       </Container>
     );
