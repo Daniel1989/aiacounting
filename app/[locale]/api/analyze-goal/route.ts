@@ -39,22 +39,11 @@ export async function POST(request: Request) {
     
     // Calculate spending patterns
     const totalExpenses = records
-      .filter(record => record.type === 'expense')
+      .filter(record => record.type === 'cost')
       .reduce((sum, record) => sum + record.amount, 0);
     const avgMonthlyExpense = totalExpenses / 3; // 90 days = 3 months
     const avgDailyExpense = avgMonthlyExpense / 30; // Average daily expense
-
-    // Prepare spending breakdown
-    const spendingBreakdown = records
-      .filter(record => record.type === 'expense')
-      .reduce((acc: Record<string, number>, record) => {
-        acc[record.category] = (acc[record.category] || 0) + record.amount;
-        return acc;
-      }, {});
     
-    const breakdownText = Object.entries(spendingBreakdown)
-      .map(([category, amount]) => `- ${category}: ${amount.toFixed(2)}`)
-      .join('\n');
 
     // Determine language for the prompt
     const language = locale === 'zh' ? 'Chinese' : 'English';
@@ -65,8 +54,8 @@ export async function POST(request: Request) {
     if (context) {
       // If context is provided, use it for better analysis
       prompt = `You are a financial planning assistant. 
-You've been given a raw analysis output about a user's financial goal.
-Using this raw output as context, create a structured financial plan.
+You've been given a raw analysis output about a user's goal.
+Using this raw output as context, create a structured financial plan based on the current financial status.
 
 Raw analysis:
 ${context}
@@ -81,16 +70,20 @@ Current Financial Status:
 - Average Daily Expenses: ${avgDailyExpense.toFixed(2)}
 - Last 90 Days Total Expenses: ${totalExpenses.toFixed(2)}
 
+Please use following steps to create a structured financial plan:
+1. Analyze the raw analysis output and extract the total amount of money needed to achieve the goal.
+2. Based on the total amount of money needed and the Monthly Income and Average Daily Expenses, calculate the daily savings needed to achieve the goal.
+3. Based on the daily savings, calculate the time needed to achieve the goal.
+4. Based on the time needed, create a structured financial plan.
+
 Please organize this information into a structured JSON format with the following structure:
 {
   "timeToGoal": number,
   "dailySavings": number,
   "suggestions": string[],
-  "actionableSteps": string[],
-  "challenges": [{"challenge": string, "solution": string}]
 }
 
-Ensure the output is valid JSON and in ${language} language.`;
+Ensure the output is valid JSON and each field value in correct type and in ${language} language.`;
     } else {
       // Regular prompt without context
       prompt = `As a financial advisor, analyze this user's goal.  
@@ -171,6 +164,7 @@ Respond in **${language}**.
         },
       });
     } else {
+      console.log('prompt', prompt);
       // Regular API call without streaming - use the original implementation
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],

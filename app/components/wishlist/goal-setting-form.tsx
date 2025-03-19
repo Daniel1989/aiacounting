@@ -145,7 +145,7 @@ const LoadingContainer = styled.div`
   > .streaming-container {
     margin-top: 32px;
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     text-align: left;
     
     > .stream-title {
@@ -176,8 +176,8 @@ const LoadingContainer = styled.div`
     }
     
     > .stream-content {
-      background: #f5f5f5;
-      padding: 16px;
+      background: #ffffff;
+      padding: 20px;
       border-radius: 8px;
       font-family: system-ui, -apple-system, sans-serif;
       font-size: 14px;
@@ -187,63 +187,81 @@ const LoadingContainer = styled.div`
       overflow-y: auto;
       border: 1px solid #e0e0e0;
       position: relative;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      line-height: 1.6;
       
       /* Markdown specific styles */
       h1, h2, h3, h4, h5, h6 {
-        margin-top: 16px;
-        margin-bottom: 8px;
+        margin-top: 20px;
+        margin-bottom: 12px;
         font-weight: 600;
+        color: #333;
+        border-bottom: none;
       }
       
-      h1 { font-size: 1.5em; }
-      h2 { font-size: 1.3em; }
-      h3 { font-size: 1.1em; }
+      h1 { 
+        font-size: 1.6em; 
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 6px;
+      }
+      h2 { 
+        font-size: 1.4em; 
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 4px;
+      }
+      h3 { font-size: 1.2em; }
+      h4 { font-size: 1.1em; }
       
       ul, ol {
-        padding-left: 20px;
-        margin: 8px 0;
+        padding-left: 24px;
+        margin: 10px 0;
       }
       
       li {
-        margin: 4px 0;
+        margin: 5px 0;
       }
       
       p {
-        margin: 8px 0;
+        margin: 10px 0;
       }
       
       code {
-        background: #e0e0e0;
-        padding: 2px 4px;
+        background: #f0f0f0;
+        padding: 3px 5px;
         border-radius: 4px;
-        font-family: monospace;
+        font-family: 'SFMono-Regular', Consolas, Liberation Mono, Menlo, monospace;
+        font-size: 0.9em;
       }
       
       pre {
-        background: #1e1e1e;
-        color: #d4d4d4;
-        padding: 12px;
+        background: #f5f5f5;
+        color: #333;
+        padding: 16px;
         border-radius: 4px;
         overflow-x: auto;
-        margin: 12px 0;
+        margin: 16px 0;
+        border: 1px solid #e0e0e0;
         
         code {
           background: transparent;
           color: inherit;
           padding: 0;
+          white-space: pre;
         }
       }
       
       blockquote {
         border-left: 4px solid #53a867;
-        padding-left: 12px;
-        margin: 12px 0;
+        padding: 0 16px;
+        margin: 16px 0;
         color: #666;
+        background: #f8f8f8;
+        font-style: italic;
       }
       
       .table-container {
         overflow-x: auto;
-        margin: 12px 0;
+        margin: 16px 0;
         border-radius: 4px;
         border: 1px solid #e0e0e0;
       }
@@ -255,12 +273,12 @@ const LoadingContainer = styled.div`
         
         th, td {
           border: 1px solid #e0e0e0;
-          padding: 8px 12px;
+          padding: 10px 16px;
           text-align: left;
         }
         
         th {
-          background: #f0f0f0;
+          background: #f5f5f5;
           font-weight: 600;
         }
         
@@ -275,6 +293,7 @@ const LoadingContainer = styled.div`
         
         &:hover {
           text-decoration: underline;
+          color: #478c58;
         }
       }
       
@@ -282,6 +301,8 @@ const LoadingContainer = styled.div`
         max-width: 100%;
         height: auto;
         border-radius: 4px;
+        margin: 16px 0;
+        display: block;
       }
 
       strong, b {
@@ -293,14 +314,38 @@ const LoadingContainer = styled.div`
         font-style: italic;
       }
 
-      /* Only show cursor when streaming is active */
+      /* GitHub Flavored Markdown specific styles */
+      del, s {
+        text-decoration: line-through;
+        color: #666;
+      }
+      
+      input[type="checkbox"] {
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+      
+      /* Task list styling */
+      li.task-list-item {
+        list-style-type: none;
+        padding-left: 0;
+        margin-left: -20px;
+      }
+      
+      ul.contains-task-list {
+        padding-left: 30px;
+      }
+
+      /* Cursor animation with better positioning */
       &.is-streaming::after {
-        content: '|';
+        content: "";
+        position: relative;
         display: inline-block;
-        color: #53a867;
+        width: 6px;
+        height: 16px;
+        background-color: #53a867;
         animation: blink 1s infinite;
-        position: absolute;
-        bottom: 16px;
+        vertical-align: text-bottom;
         margin-left: 2px;
       }
     }
@@ -333,12 +378,16 @@ const AnalysisResult = styled.div`
       font-size: 16px;
       font-weight: bold;
       margin-bottom: 16px;
+      color: #333;
     }
     
     > .content {
-      background: #f5f5f5;
+      background: #ffffff;
       padding: 16px;
       border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      font-size: 14px;
       
       &.metrics {
         display: grid;
@@ -352,6 +401,7 @@ const AnalysisResult = styled.div`
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 4px;
+            color: #53a867;
           }
           
           > .label {
@@ -371,6 +421,7 @@ const AnalysisResult = styled.div`
             content: "•";
             position: absolute;
             left: 0;
+            color: #53a867;
           }
           
           &:last-child {
@@ -386,11 +437,20 @@ const AnalysisResult = styled.div`
           > .problem {
             font-weight: 500;
             margin-bottom: 8px;
+            color: #333;
           }
           
           > .solution {
             color: #666;
             padding-left: 16px;
+            position: relative;
+            
+            &:before {
+              content: "→";
+              position: absolute;
+              left: 0;
+              color: #53a867;
+            }
           }
           
           &:last-child {
@@ -505,8 +565,8 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
           monthlyIncome: parseFloat(formData.monthlyIncome),
           description: formData.description,
-          useStream: true, // Enable streaming
-          locale: locale,
+          useStream: true,
+          locale,
         }),
       });
       
@@ -527,7 +587,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               const { done, value } = await reader.read();
               
               if (done) {
-                setStreamComplete(true);
+                // setStreamComplete(true);
                 break;
               }
               
@@ -577,6 +637,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         }
         
         const analysisResult = await finalResponse.json();
+        setStreamComplete(true);
         setAnalysis(analysisResult);
         setIsProcessingFinal(false);
       } else {
@@ -667,6 +728,20 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
     ),
     // Add unique keys to list items to prevent React warnings
     li: ({ node, ...props }: any) => <li key={node.position?.start.offset} {...props} />,
+    // Handle task lists with proper styling
+    input: ({ node, ...props }: any) => {
+      if (props.type === 'checkbox') {
+        return (
+          <input
+            type="checkbox"
+            checked={props.checked}
+            readOnly
+            {...props}
+          />
+        );
+      }
+      return <input {...props} />;
+    }
   };
   
   if (isAnalyzing) {
@@ -698,7 +773,10 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 className={`stream-content ${!streamComplete ? 'is-streaming' : ''}`}
                 ref={streamContentRef}
               >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]} 
+                  components={MarkdownComponents}
+                >
                   {streamedResponse}
                 </ReactMarkdown>
               </div>
@@ -725,7 +803,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 <div className="label">{t('estimatedTime')}</div>
               </div>
               <div className="metric">
-                <div className="value">¥{analysis.dailySavings?.toFixed(2)}</div>
+                <div className="value">¥{analysis.dailySavings}</div>
                 <div className="label">{t('dailySavings')}</div>
               </div>
             </div>
@@ -737,31 +815,6 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               <div className="content list">
                 {analysis.suggestions.map((suggestion, index) => (
                   <div key={index} className="item">{suggestion}</div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {analysis.actionableSteps && analysis.actionableSteps.length > 0 && (
-            <div className="section">
-              <div className="title">{t('actionableSteps')}</div>
-              <div className="content list">
-                {analysis.actionableSteps.map((step, index) => (
-                  <div key={index} className="item">{step}</div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {analysis.challenges && analysis.challenges.length > 0 && (
-            <div className="section">
-              <div className="title">{t('challenges')}</div>
-              <div className="content challenges">
-                {analysis.challenges.map((item, index) => (
-                  <div key={index} className="challenge">
-                    <div className="problem">{item.challenge}</div>
-                    <div className="solution">{item.solution}</div>
-                  </div>
                 ))}
               </div>
             </div>
