@@ -214,14 +214,14 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       {/* Image preview */}
       {imageUrl && (
         <div className="mt-4">
-          <div className="relative w-full h-48 bg-gray-100 rounded-md overflow-hidden">
+          {/* <div className="relative w-full h-48 bg-gray-100 rounded-md overflow-hidden">
             <Image
               src={imageUrl}
               alt="Receipt"
               fill
               style={{ objectFit: 'contain' }}
             />
-          </div>
+          </div> */}
           
           {/* Loading indicator for analysis */}
           {isAnalyzing && (

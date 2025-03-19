@@ -202,13 +202,15 @@ Respond in **${language}**.
         },
       });
     } else {
+      console.log('start to call openai', model );
+      console.log('prompt', prompt);
       // Regular API call without streaming - use the original implementation
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: model!,
         response_format: { type: "json_object" },
       });
-      
+      console.log('return openai response successfully');
       const content = completion.choices[0].message.content;
       if (!content) {
         throw new Error('No content in OpenAI response');
