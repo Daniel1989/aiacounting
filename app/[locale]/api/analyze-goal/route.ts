@@ -21,14 +21,21 @@ export async function POST(request: Request) {
     }
     
     const { locale, type, targetAmount, monthlyIncome, description, useStream, context } = await request.json();
-    console.log(locale, type, targetAmount, monthlyIncome, description, useStream, context);
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     
     const { data: records, error: recordsError } = await supabase
       .from('records')
-      .select('*')
+      .select(`
+        *,
+        tags:tag_id (
+          id,
+          name,
+          icon,
+          category
+        )
+      `)
       .eq('user_id', user.id)
       .gte('updated_at', ninetyDaysAgo.toISOString())
       .order('updated_at', { ascending: false });
@@ -36,15 +43,30 @@ export async function POST(request: Request) {
     if (recordsError) {
       return NextResponse.json({ error: 'Failed to fetch records' }, { status: 500 });
     }
+
+
+    const processedRecords = records.map(record => ({
+      ...record,
+      type: record.category || 'unknown',
+      category: record.tags?.category || 'unknown',
+      tagName: record.tags?.name || 'unknown'
+    }));
     
     // Calculate spending patterns
-    const totalExpenses = records
+    const totalExpenses = processedRecords
       .filter(record => record.type === 'cost')
       .reduce((sum, record) => sum + record.amount, 0);
     const avgMonthlyExpense = totalExpenses / 3; // 90 days = 3 months
     const avgDailyExpense = avgMonthlyExpense / 30; // Average daily expense
     
 
+    const breakdownExpenses = processedRecords
+      .filter(record => record.type === 'cost')
+      .reduce((acc, record) => {
+        acc[record.tagName] = (acc[record.tagName] || 0) + record.amount;
+        return acc;
+      }, {});
+      
     // Determine language for the prompt
     const language = locale === 'zh' ? 'Chinese' : 'English';
     
@@ -65,6 +87,11 @@ ${targetAmount ? `Target Amount: ${targetAmount}` : ''}
 Monthly Income: ${monthlyIncome}
 Goal Description: ${description}
 
+Breakdown of User Current Expenses Habits:
+${Object.entries(breakdownExpenses)
+  .map(([key, value]) => `${key}: ${value}`)
+  .join('\n')}
+
 Current Financial Status:
 - Average Monthly Expenses: ${avgMonthlyExpense.toFixed(2)}
 - Average Daily Expenses: ${avgDailyExpense.toFixed(2)}
@@ -74,14 +101,20 @@ Please use following steps to create a structured financial plan:
 1. Analyze the raw analysis output and extract the total amount of money needed to achieve the goal.
 2. Based on the total amount of money needed and the Monthly Income and Average Daily Expenses, calculate the daily savings needed to achieve the goal.
 3. Based on the daily savings, calculate the time needed to achieve the goal.
-4. Based on the time needed, create a structured financial plan.
+4. Based on the daily savings, calculate a recommended maximum daily expense (dailyMaxExpense) the user should maintain to stay on track.
+5. Based on the time needed, create a structured financial plan.
 
 Please organize this information into a structured JSON format with the following structure:
 {
   "timeToGoal": number,
   "dailySavings": number,
-  "suggestions": string[],
+  "dailyMaxExpense": number,
+  "suggestions": string[]
 }
+
+You should give 3 or 5 suggestions for the user to choose from.
+At least one suggestion should be a variation of the goal, such as a different time period or a different amount.
+At least one suggestion should be how to reduce the daily expense based on the breakdown of user current expenses habits.
 
 Ensure the output is valid JSON and each field value in correct type and in ${language} language.`;
     } else {
@@ -189,6 +222,7 @@ Respond in **${language}**.
           monthly_income: monthlyIncome,
           time_to_goal: analysis.timeToGoal,
           daily_savings: analysis.dailySavings,
+          daily_max_expense: analysis.dailyMaxExpense,
           suggestions: analysis.suggestions,
           actionable_steps: analysis.actionableSteps,
           challenges: analysis.challenges,

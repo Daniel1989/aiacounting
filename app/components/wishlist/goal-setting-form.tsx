@@ -24,6 +24,9 @@ interface AnalysisResult {
   suggestions: string[];
   actionableSteps: string[];
   challenges: { challenge: string; solution: string; }[];
+  dailyMaxExpense?: number;
+  totalCost?: number;
+  rawLlmOutput?: string;
 }
 
 const Container = styled.div`
@@ -391,7 +394,7 @@ const AnalysisResult = styled.div`
       
       &.metrics {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 16px;
         
         > .metric {
@@ -402,6 +405,7 @@ const AnalysisResult = styled.div`
             font-weight: bold;
             margin-bottom: 4px;
             color: #53a867;
+            word-break: break-word;
           }
           
           > .label {
@@ -409,6 +413,190 @@ const AnalysisResult = styled.div`
             color: #666;
           }
         }
+      }
+      
+      &.raw-response {
+        max-height: 500px;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.6;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 6px;
+        word-break: break-word;
+
+        background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      overflow-x: auto;
+      word-break: break-word;
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      position: relative;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      line-height: 1.6;
+      
+      /* Markdown specific styles */
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 20px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #333;
+        border-bottom: none;
+      }
+      
+      h1 { 
+        font-size: 1.6em; 
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 6px;
+      }
+      h2 { 
+        font-size: 1.4em; 
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 4px;
+      }
+      h3 { font-size: 1.2em; }
+      h4 { font-size: 1.1em; }
+      
+      ul, ol {
+        padding-left: 24px;
+        margin: 10px 0;
+      }
+      
+      li {
+        margin: 5px 0;
+      }
+      
+      p {
+        margin: 10px 0;
+      }
+      
+      code {
+        background: #f0f0f0;
+        padding: 3px 5px;
+        border-radius: 4px;
+        font-family: 'SFMono-Regular', Consolas, Liberation Mono, Menlo, monospace;
+        font-size: 0.9em;
+      }
+      
+      pre {
+        background: #f5f5f5;
+        color: #333;
+        padding: 16px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin: 16px 0;
+        border: 1px solid #e0e0e0;
+        
+        code {
+          background: transparent;
+          color: inherit;
+          padding: 0;
+          white-space: pre;
+        }
+      }
+      
+      blockquote {
+        border-left: 4px solid #53a867;
+        padding: 0 16px;
+        margin: 16px 0;
+        color: #666;
+        background: #f8f8f8;
+        font-style: italic;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+        margin: 16px 0;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0;
+        
+        th, td {
+          border: 1px solid #e0e0e0;
+          padding: 10px 16px;
+          text-align: left;
+        }
+        
+        th {
+          background: #f5f5f5;
+          font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+          background: #f8f8f8;
+        }
+      }
+      
+      a {
+        color: #53a867;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+          color: #478c58;
+        }
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        margin: 16px 0;
+        display: block;
+      }
+
+      strong, b {
+        font-weight: 600;
+        color: #333;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+
+      /* GitHub Flavored Markdown specific styles */
+      del, s {
+        text-decoration: line-through;
+        color: #666;
+      }
+      
+      input[type="checkbox"] {
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+      
+      /* Task list styling */
+      li.task-list-item {
+        list-style-type: none;
+        padding-left: 0;
+        margin-left: -20px;
+      }
+      
+      ul.contains-task-list {
+        padding-left: 30px;
+      }
+
+      /* Cursor animation with better positioning */
+      &.is-streaming::after {
+        content: "";
+        position: relative;
+        display: inline-block;
+        width: 6px;
+        height: 16px;
+        background-color: #53a867;
+        animation: blink 1s infinite;
+        vertical-align: text-bottom;
+        margin-left: 2px;
+      }
       }
       
       &.list {
@@ -534,6 +722,8 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         setAnalysis({
           timeToGoal: existingGoal.time_to_goal,
           dailySavings: existingGoal.daily_savings,
+          dailyMaxExpense: existingGoal.daily_max_expense,
+          totalCost: existingGoal.target_amount || (existingGoal.time_to_goal * existingGoal.daily_savings),
           suggestions: [],
           actionableSteps: [],
           challenges: []
@@ -596,15 +786,6 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               
               rawLlmOutput += chunk;
               setStreamedResponse(prev => prev + chunk);
-              // Process each line in the chunk
-              // const lines = chunk.split('\n\n');
-              // for (const line of lines) {
-              //   if (line.startsWith('data: ')) {
-              //     const data = line.substring(6);
-              //     rawLlmOutput += data;
-              //     setStreamedResponse(prev => prev + data);
-              //   }
-              // }
             }
           } catch (error) {
             console.error('Error reading stream:', error);
@@ -638,7 +819,21 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         
         const analysisResult = await finalResponse.json();
         setStreamComplete(true);
-        setAnalysis(analysisResult);
+        
+        // Calculate total cost from timeToGoal and dailySavings
+        let totalCost = analysisResult.timeToGoal * analysisResult.dailySavings;
+        
+        // If savings type with target amount, use that as priority
+        if (type === 'savings' && formData.targetAmount) {
+          totalCost = parseFloat(formData.targetAmount);
+        }
+        
+        setAnalysis({
+          ...analysisResult, 
+          rawLlmOutput,
+          totalCost
+        });
+        
         setIsProcessingFinal(false);
       } else {
         throw new Error('No raw output obtained from stream');
@@ -688,6 +883,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         description: formData.description,
         time_to_goal: analysis?.timeToGoal,
         daily_savings: analysis?.dailySavings,
+        daily_max_expense: analysis?.dailyMaxExpense,
         status: 'active'
       };
       
@@ -719,30 +915,6 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
     }
   };
 
-  // Helper components for ReactMarkdown
-  const MarkdownComponents = {
-    table: (props: any) => (
-      <div className="table-container">
-        <table {...props} />
-      </div>
-    ),
-    // Add unique keys to list items to prevent React warnings
-    li: ({ node, ...props }: any) => <li key={node.position?.start.offset} {...props} />,
-    // Handle task lists with proper styling
-    input: ({ node, ...props }: any) => {
-      if (props.type === 'checkbox') {
-        return (
-          <input
-            type="checkbox"
-            checked={props.checked}
-            readOnly
-            {...props}
-          />
-        );
-      }
-      return <input {...props} />;
-    }
-  };
   
   if (isAnalyzing) {
     return (
@@ -775,7 +947,6 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               >
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]} 
-                  components={MarkdownComponents}
                 >
                   {streamedResponse}
                 </ReactMarkdown>
@@ -798,14 +969,26 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           <div className="section">
             <div className="title">{t('overview')}</div>
             <div className="content metrics">
+              {analysis.totalCost && (
+                <div className="metric">
+                  <div className="value">¥{analysis.totalCost.toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
+                  <div className="label">{t('totalCost')}</div>
+                </div>
+              )}
               <div className="metric">
                 <div className="value">{analysis.timeToGoal} {t('days')}</div>
                 <div className="label">{t('estimatedTime')}</div>
               </div>
               <div className="metric">
-                <div className="value">¥{analysis.dailySavings}</div>
+                <div className="value">¥{analysis.dailySavings?.toFixed(2)}</div>
                 <div className="label">{t('dailySavings')}</div>
               </div>
+              {analysis.dailyMaxExpense && (
+                <div className="metric">
+                  <div className="value">¥{analysis.dailyMaxExpense.toFixed(2)}</div>
+                  <div className="label">{t('dailyMaxExpense')}</div>
+                </div>
+              )}
             </div>
           </div>
           
@@ -816,6 +999,20 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 {analysis.suggestions.map((suggestion, index) => (
                   <div key={index} className="item">{suggestion}</div>
                 ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Display raw LLM response at the bottom */}
+          {analysis.rawLlmOutput && (
+            <div className="section">
+              <div className="title">{t('rawAnalysis')}</div>
+              <div className="content raw-response">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]} 
+                >
+                  {analysis.rawLlmOutput}
+                </ReactMarkdown>
               </div>
             </div>
           )}
