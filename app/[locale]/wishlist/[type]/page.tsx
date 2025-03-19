@@ -37,7 +37,7 @@ export default async function GoalSettingPage(props: any) {
   const params = await props.params;
   const { searchParams } = props;
   const { locale, type } = params;
-  const { edit } = searchParams;
+  const { edit } = await searchParams;
   
   const validTypes = ['travel', 'shopping', 'savings'];
   
