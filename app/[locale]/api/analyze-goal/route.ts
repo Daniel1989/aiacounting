@@ -178,10 +178,10 @@ Respond in **${language}**.
               model: "bot-20250218193443-c7vhp",
               stream: true,
             });
-            console.log("finish call in controller")
+            console.log("finish call in controller", completion)
             for await (const chunk of completion) {
+              console.log("inner chunks")
               const content = chunk.choices[0]?.delta?.content || '';
-              
               // Send the chunk to the client
               controller.enqueue(encoder.encode(content));
             }
