@@ -8,6 +8,8 @@ import { styled } from 'styled-components';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'
+
 
 interface GoalSettingFormProps {
   userId: string;
@@ -532,15 +534,17 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               // Decode the chunk
               const chunk = decoder.decode(value, { stream: true });
               
+              rawLlmOutput += chunk;
+              setStreamedResponse(prev => prev + chunk);
               // Process each line in the chunk
-              const lines = chunk.split('\n\n');
-              for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                  const data = line.substring(6);
-                  rawLlmOutput += data;
-                  setStreamedResponse(prev => prev + data);
-                }
-              }
+              // const lines = chunk.split('\n\n');
+              // for (const line of lines) {
+              //   if (line.startsWith('data: ')) {
+              //     const data = line.substring(6);
+              //     rawLlmOutput += data;
+              //     setStreamedResponse(prev => prev + data);
+              //   }
+              // }
             }
           } catch (error) {
             console.error('Error reading stream:', error);
@@ -550,36 +554,36 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       }
       
       // Step 2: Use the original API with the raw LLM output as context
-      // if (rawLlmOutput) {
-      //   setIsProcessingFinal(true);
+      if (rawLlmOutput) {
+        setIsProcessingFinal(true);
         
-      //   const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       type,
-      //       targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
-      //       monthlyIncome: parseFloat(formData.monthlyIncome),
-      //       description: formData.description,
-      //       context: rawLlmOutput, // Use the raw LLM output as context
-      //       locale: locale,
-      //     }),
-      //   });
+        const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type,
+            targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+            monthlyIncome: parseFloat(formData.monthlyIncome),
+            description: formData.description,
+            context: rawLlmOutput, // Use the raw LLM output as context
+            locale: locale,
+          }),
+        });
         
-      //   if (!finalResponse.ok) {
-      //     throw new Error('Final analysis failed');
-      //   }
+        if (!finalResponse.ok) {
+          throw new Error('Final analysis failed');
+        }
         
-      //   const analysisResult = await finalResponse.json();
-      //   setAnalysis(analysisResult);
-      //   setIsProcessingFinal(false);
-      // } else {
-      //   throw new Error('No raw output obtained from stream');
-      // }
+        const analysisResult = await finalResponse.json();
+        setAnalysis(analysisResult);
+        setIsProcessingFinal(false);
+      } else {
+        throw new Error('No raw output obtained from stream');
+      }
       
-      // setIsAnalyzing(false);
+      setIsAnalyzing(false);
       
     } catch (error) {
       console.error('Error:', error);
@@ -653,7 +657,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       toast.error(existingGoal ? t('errorUpdatingGoal') : t('errorCreatingGoal'));
     }
   };
-  
+
   // Helper components for ReactMarkdown
   const MarkdownComponents = {
     table: (props: any) => (
@@ -694,7 +698,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 className={`stream-content ${!streamComplete ? 'is-streaming' : ''}`}
                 ref={streamContentRef}
               >
-                <ReactMarkdown components={MarkdownComponents}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {streamedResponse}
                 </ReactMarkdown>
               </div>

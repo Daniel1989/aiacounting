@@ -93,29 +93,44 @@ Please organize this information into a structured JSON format with the followin
 Ensure the output is valid JSON and in ${language} language.`;
     } else {
       // Regular prompt without context
-      prompt = `As a financial advisor, analyze this user's goal. 
-Respond in ${language} language.
+      prompt = `As a financial advisor, analyze this user's goal.  
+Respond in ${language} language using **correct Markdown formatting**.  
 
-Goal Type: ${type}
-Goal Description: ${description}
+### Goal Details:
+- **Goal Type:** ${type}  
+- **Goal Description:** ${description}  
 
-Please provide a comprehensive analysis with:
-1. **Detailed breakdown of expenses needed to achieve this goal**
-   - Include a table of estimated costs
-   - Use markdown for formatting
-   
-2. **Alternative options that might be more affordable**
-   - Compare multiple alternatives
-   - Highlight pros and cons of each
+### Instructions:
+Please provide a **comprehensive analysis** with the following structure:  
 
-And use markdown for formatting. Do following check and fix those issues:
-	1.	Inconsistent heading levels
-	2.	Table formatting issues
-	3.	Improper list formatting
-	4.	Incomplete table divider lines
-	5.	Extra separators and formatting issues
+1. **Detailed Breakdown of Expenses Needed to Achieve This Goal**  
+   - Include a **well-formatted table** of estimated costs using the correct Markdown table syntax.  
+   - Ensure table headers are aligned properly and avoid missing dividers.  
 
-Remember to respond in ${language} language.
+2. **Alternative similar goal that might be more affordable**  
+   - Provide at least **two alternative options**.  
+   - Use a **consistent list format** with bullet points ('-') or numbered lists ('1.').  
+   - Clearly state the **pros and cons** of each option in a consistent format.  
+
+### Formatting Guidelines:
+- Use **consistent heading levels** (e.g., '###', '####') throughout the response.  
+- Ensure that **table dividers** (using '|---|---|') are complete and properly aligned.  
+- Avoid using extra separators ('---') or incorrect formatting characters.  
+- Double-check that lists, bold/italic text, and other Markdown elements are **correctly formatted**.  
+
+### Example Table Format:
+
+Item	Estimated Cost	Notes
+Item 1	$100 - $200	Description
+Item 2	$150 - $300	Description
+
+### Example List Format:
+- **Option 1:** Description  
+   - ✅ Advantage 1  
+   - ❌ Disadvantage 1  
+
+### Response Language:
+Respond in **${language}**.  
 `;
     }
 
@@ -126,11 +141,9 @@ Remember to respond in ${language} language.
         async start(controller) {
           try {
             // Use a different model for streaming if needed
-            const streamingModel = "bot-20250218193443-c7vhp";
-            
             const completion = await deepseek.chat.completions.create({
               messages: [{ role: "user", content: prompt }],
-              model: streamingModel,
+              model: "bot-20250218193443-c7vhp",
               stream: true,
             });
             
@@ -138,7 +151,7 @@ Remember to respond in ${language} language.
               const content = chunk.choices[0]?.delta?.content || '';
               
               // Send the chunk to the client
-              controller.enqueue(encoder.encode(`data: ${content}\n\n`));
+              controller.enqueue(encoder.encode(content));
             }
             
             // Stream complete, close the controller
