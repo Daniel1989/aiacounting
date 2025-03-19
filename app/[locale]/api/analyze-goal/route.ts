@@ -172,19 +172,20 @@ Respond in **${language}**.
         async start(controller) {
           try {
             // Use a different model for streaming if needed
+            console.log("start call in controller")
             const completion = await deepseek.chat.completions.create({
               messages: [{ role: "user", content: prompt }],
               model: "bot-20250218193443-c7vhp",
               stream: true,
             });
-            
+            console.log("finish call in controller")
             for await (const chunk of completion) {
               const content = chunk.choices[0]?.delta?.content || '';
               
               // Send the chunk to the client
               controller.enqueue(encoder.encode(content));
             }
-            
+            console.log("close controller")
             // Stream complete, close the controller
             controller.close();
           } catch (error) {
