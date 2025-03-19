@@ -165,6 +165,7 @@ Respond in **${language}**.
 
     // Use streaming response - just stream the raw output without parsing
     if (useStream) {
+      console.log('start to call deepseek');
       const encoder = new TextEncoder();
       const customReadable = new ReadableStream({
         async start(controller) {
@@ -186,12 +187,13 @@ Respond in **${language}**.
             // Stream complete, close the controller
             controller.close();
           } catch (error) {
+            console.log('streaming error', error);
             console.error('Streaming error:', error);
             controller.error(error);
           }
         }
       });
-      
+      console.log('return stream response successfully');
       return new Response(customReadable, {
         headers: {
           'Content-Type': 'text/event-stream',
