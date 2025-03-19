@@ -1,6 +1,7 @@
-import { createClient } from '@/app/lib/supabase/client';
-import { NextRequest, NextResponse } from 'next/server';
-import { syncUser } from '@/app/lib/supabase/database';
+import { type EmailOtpType } from '@supabase/supabase-js'
+import { type NextRequest } from 'next/server'
+import { createClient } from '@/app/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
 interface CallbackParams {
   params: Promise<{ locale: string }>;
@@ -12,39 +13,25 @@ export async function GET(
 ) {
   // In Next.js 15, we need to await the params
   const { locale } = await params;
-  
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
-  
-  if (code) {
-    const supabase = createClient();
-    
-    // Exchange the code for a session
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (error) {
-      console.error('Error exchanging code for session:', error);
-      // If there's an error, redirect to login page
-      return NextResponse.redirect(new URL(`/${locale}/login`, requestUrl.origin));
-    }
-    
-    // Get the user data after authentication
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // Sync the user with our database if authentication was successful
-    if (user) {
-      try {
-        await syncUser({
-          id: user.id,
-          email: user.email || '',
-        });
-      } catch (error) {
-        console.error('Error syncing user:', error);
-        // Continue with the flow even if syncing fails
-      }
+
+  const { searchParams } = new URL(request.url)
+  const token_hash = searchParams.get('token_hash')
+  const type = searchParams.get('type') as EmailOtpType | null
+  const next = searchParams.get('next') ?? `/${locale}`
+
+  if (token_hash && type) {
+    const supabase = await createClient()
+
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash,
+    })
+    if (!error) {
+      // redirect user to specified redirect URL or root of app
+      redirect(next)
     }
   }
 
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL(`/${locale}`, requestUrl.origin));
+  // redirect the user to an error page with some instructions
+  redirect('/error')
 } 
