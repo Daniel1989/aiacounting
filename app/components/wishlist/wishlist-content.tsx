@@ -278,7 +278,7 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
               .from('records')
               .select('amount')
               .eq('user_id', userId)
-              .eq('type', 'cost')
+              .eq('category', 'cost')
               .gte('created_at', data.created_at)
               .order('created_at', { ascending: false });
             
@@ -298,7 +298,7 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
               .from('records')
               .select('amount')
               .eq('user_id', userId)
-              .eq('type', 'cost')
+              .eq('category', 'cost')
               .gte('created_at', today.toISOString())
               .order('created_at', { ascending: false });
             

@@ -1,6 +1,7 @@
 import { createClient } from '@/app/lib/supabase/server';
 import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
+import { getCurrentUser } from '@/app/lib/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -18,8 +19,9 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+
+    const userInfo = await getCurrentUser();
+    if (authError || !user || !userInfo) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
@@ -27,7 +29,6 @@ export async function POST(request: Request) {
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    
     const { data: records, error: recordsError } = await supabase
       .from('records')
       .select(`
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
           category
         )
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', userInfo.id)
       .gte('updated_at', ninetyDaysAgo.toISOString())
       .order('updated_at', { ascending: false });
       
@@ -203,7 +204,6 @@ Respond in **${language}**.
       });
     } else {
       console.log('start to call openai', model );
-      console.log('prompt', prompt);
       // Regular API call without streaming - use the original implementation
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],

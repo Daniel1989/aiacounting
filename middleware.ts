@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   if (!pathnameHasLocale) {
     // Get the locale from the Accept-Language header or use 'zh' as default
     const acceptLanguage = request.headers.get('accept-language') || '';
-    const preferredLocale = acceptLanguage.includes('en') ? 'en' : 'zh';
+    const preferredLocale = acceptLanguage.includes('zh-CN') ? 'zh' : 'en';
     
     // Create the URL with the preferred locale
     const url = new URL(`/${preferredLocale}${pathname}`, request.url);

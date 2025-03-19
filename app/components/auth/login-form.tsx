@@ -66,7 +66,7 @@ export function LoginForm({ redirectTo }: any) {
           } else {
             router.push(`/${locale}`);
           }
-        }, 2000);
+        }, 1000);
       } else {
         // For registration, use the non-localized callback route
         // This is because the email link will not have the locale information
