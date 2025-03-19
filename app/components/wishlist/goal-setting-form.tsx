@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 import { styled } from 'styled-components';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
 
 interface GoalSettingFormProps {
   userId: string;
@@ -176,20 +177,129 @@ const LoadingContainer = styled.div`
       background: #f5f5f5;
       padding: 16px;
       border-radius: 8px;
-      font-family: monospace;
+      font-family: system-ui, -apple-system, sans-serif;
       font-size: 14px;
       overflow-x: auto;
-      white-space: pre-wrap;
       word-break: break-word;
-      max-height: 300px;
+      max-height: 500px;
       overflow-y: auto;
       border: 1px solid #e0e0e0;
+      position: relative;
       
-      &::after {
+      /* Markdown specific styles */
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 16px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      
+      h1 { font-size: 1.5em; }
+      h2 { font-size: 1.3em; }
+      h3 { font-size: 1.1em; }
+      
+      ul, ol {
+        padding-left: 20px;
+        margin: 8px 0;
+      }
+      
+      li {
+        margin: 4px 0;
+      }
+      
+      p {
+        margin: 8px 0;
+      }
+      
+      code {
+        background: #e0e0e0;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+      
+      pre {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 12px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin: 12px 0;
+        
+        code {
+          background: transparent;
+          color: inherit;
+          padding: 0;
+        }
+      }
+      
+      blockquote {
+        border-left: 4px solid #53a867;
+        padding-left: 12px;
+        margin: 12px 0;
+        color: #666;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+        margin: 12px 0;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0;
+        
+        th, td {
+          border: 1px solid #e0e0e0;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        
+        th {
+          background: #f0f0f0;
+          font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+          background: #f8f8f8;
+        }
+      }
+      
+      a {
+        color: #53a867;
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+      }
+
+      strong, b {
+        font-weight: 600;
+        color: #333;
+      }
+
+      em, i {
+        font-style: italic;
+      }
+
+      /* Only show cursor when streaming is active */
+      &.is-streaming::after {
         content: '|';
         display: inline-block;
         color: #53a867;
         animation: blink 1s infinite;
+        position: absolute;
+        bottom: 16px;
+        margin-left: 2px;
       }
     }
   }
@@ -339,6 +449,14 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
   });
   const [streamedResponse, setStreamedResponse] = useState<string>('');
   const [streamComplete, setStreamComplete] = useState(false);
+  const streamContentRef = useRef<HTMLDivElement>(null);
+  
+  // Automatically scroll to the bottom of the stream content as new content comes in
+  useEffect(() => {
+    if (streamContentRef.current && !streamComplete) {
+      streamContentRef.current.scrollTop = streamContentRef.current.scrollHeight;
+    }
+  }, [streamedResponse, streamComplete]);
   
   // Initialize form with existing goal data if available
   useEffect(() => {
@@ -386,6 +504,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           monthlyIncome: parseFloat(formData.monthlyIncome),
           description: formData.description,
           useStream: true, // Enable streaming
+          locale: locale,
         }),
       });
       
@@ -431,35 +550,36 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       }
       
       // Step 2: Use the original API with the raw LLM output as context
-      if (rawLlmOutput) {
-        setIsProcessingFinal(true);
+      // if (rawLlmOutput) {
+      //   setIsProcessingFinal(true);
         
-        const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type,
-            targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
-            monthlyIncome: parseFloat(formData.monthlyIncome),
-            description: formData.description,
-            context: rawLlmOutput, // Use the raw LLM output as context
-          }),
-        });
+      //   const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       type,
+      //       targetAmount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+      //       monthlyIncome: parseFloat(formData.monthlyIncome),
+      //       description: formData.description,
+      //       context: rawLlmOutput, // Use the raw LLM output as context
+      //       locale: locale,
+      //     }),
+      //   });
         
-        if (!finalResponse.ok) {
-          throw new Error('Final analysis failed');
-        }
+      //   if (!finalResponse.ok) {
+      //     throw new Error('Final analysis failed');
+      //   }
         
-        const analysisResult = await finalResponse.json();
-        setAnalysis(analysisResult);
-        setIsProcessingFinal(false);
-      } else {
-        throw new Error('No raw output obtained from stream');
-      }
+      //   const analysisResult = await finalResponse.json();
+      //   setAnalysis(analysisResult);
+      //   setIsProcessingFinal(false);
+      // } else {
+      //   throw new Error('No raw output obtained from stream');
+      // }
       
-      setIsAnalyzing(false);
+      // setIsAnalyzing(false);
       
     } catch (error) {
       console.error('Error:', error);
@@ -534,6 +654,17 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
     }
   };
   
+  // Helper components for ReactMarkdown
+  const MarkdownComponents = {
+    table: (props: any) => (
+      <div className="table-container">
+        <table {...props} />
+      </div>
+    ),
+    // Add unique keys to list items to prevent React warnings
+    li: ({ node, ...props }: any) => <li key={node.position?.start.offset} {...props} />,
+  };
+  
   if (isAnalyzing) {
     return (
       <Container>
@@ -559,9 +690,14 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                   </span>
                 )}
               </div>
-              <pre className="stream-content">
-                {streamedResponse}
-              </pre>
+              <div 
+                className={`stream-content ${!streamComplete ? 'is-streaming' : ''}`}
+                ref={streamContentRef}
+              >
+                <ReactMarkdown components={MarkdownComponents}>
+                  {streamedResponse}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
         </LoadingContainer>
@@ -585,7 +721,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 <div className="label">{t('estimatedTime')}</div>
               </div>
               <div className="metric">
-                <div className="value">¥{analysis.dailySavings.toFixed(2)}</div>
+                <div className="value">¥{analysis.dailySavings?.toFixed(2)}</div>
                 <div className="label">{t('dailySavings')}</div>
               </div>
             </div>

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
     
     const { locale, type, targetAmount, monthlyIncome, description, useStream, context } = await request.json();
-    
+    console.log(locale, type, targetAmount, monthlyIncome, description, useStream, context);
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -99,11 +99,24 @@ Respond in ${language} language.
 Goal Type: ${type}
 Goal Description: ${description}
 
-Please provide:
-1. list all detail expenses to achieve the goal
-2. suggest other similar alternative destinations that are more affordable.
+Please provide a comprehensive analysis with:
+1. **Detailed breakdown of expenses needed to achieve this goal**
+   - Include a table of estimated costs
+   - Use markdown for formatting
+   
+2. **Alternative options that might be more affordable**
+   - Compare multiple alternatives
+   - Highlight pros and cons of each
 
-Remember to respond in ${language} language.`;
+And use markdown for formatting. Do following check and fix those issues:
+	1.	Inconsistent heading levels
+	2.	Table formatting issues
+	3.	Improper list formatting
+	4.	Incomplete table divider lines
+	5.	Extra separators and formatting issues
+
+Remember to respond in ${language} language.
+`;
     }
 
     // Use streaming response - just stream the raw output without parsing

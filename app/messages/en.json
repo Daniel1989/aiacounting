@@ -222,7 +222,7 @@
     "goalUpdated": "Goal updated successfully",
     "errorUpdatingGoal": "Error updating goal",
     "errorParsingResponse": "Error parsing the analysis response",
-    "rawResponse": "Raw AI Response",
+    "rawResponse": "Thinking...",
     "streaming": "Streaming",
     "errorStreamAnalysis": "Error in streaming analysis",
     "errorFinalAnalysis": "Error in final analysis",

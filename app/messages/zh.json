@@ -222,7 +222,7 @@
     "goalUpdated": "目标更新成功",
     "errorUpdatingGoal": "更新目标时出错",
     "errorParsingResponse": "解析分析响应时出错",
-    "rawResponse": "AI 原始响应",
+    "rawResponse": "AI思考中",
     "streaming": "响应中",
     "errorStreamAnalysis": "流式分析出错",
     "errorFinalAnalysis": "最终分析出错",
