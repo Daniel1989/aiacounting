@@ -98,7 +98,7 @@ Current Financial Status:
 - Last 90 Days Total Expenses: ${totalExpenses.toFixed(2)}
 
 Please use following steps to create a structured financial plan:
-1. Analyze the raw analysis output and extract the total amount of money needed to achieve the goal.
+1. Analyze the raw analysis output and extract the total amount of money needed to achieve the goal, it should be a number, if the raw analysis output is a range, please use the average value of the range.
 2. Based on the total amount of money needed and the Monthly Income and Average Daily Expenses, calculate the daily savings needed to achieve the goal.
 3. Based on the daily savings, calculate the time needed to achieve the goal.
 4. Based on the daily savings, calculate a recommended maximum daily expense (dailyMaxExpense) the user should maintain to stay on track.
@@ -106,7 +106,7 @@ Please use following steps to create a structured financial plan:
 
 Please organize this information into a structured JSON format with the following structure:
 {
-  "timeToGoal": number,
+  "totalCost": number,
   "dailySavings": number,
   "dailyMaxExpense": number,
   "suggestions": string[]
@@ -218,14 +218,14 @@ Respond in **${language}**.
         .insert({
           user_id: user.id,
           goal_type: type,
-          target_amount: targetAmount,
+          target_amount: targetAmount || analysis.totalCost,
           monthly_income: monthlyIncome,
-          time_to_goal: analysis.timeToGoal,
+          time_to_goal: Math.floor((targetAmount || analysis.totalCost) / analysis.dailySavings).toFixed(0),
           daily_savings: analysis.dailySavings,
           daily_max_expense: analysis.dailyMaxExpense,
           suggestions: analysis.suggestions,
-          actionable_steps: analysis.actionableSteps,
-          challenges: analysis.challenges,
+          actionable_steps: [],
+          challenges: [],
           created_at: new Date().toISOString()
         });
 

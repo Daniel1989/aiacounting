@@ -19,13 +19,12 @@ interface GoalSettingFormProps {
 }
 
 interface AnalysisResult {
-  timeToGoal: number;
   dailySavings: number;
   suggestions: string[];
   actionableSteps: string[];
   challenges: { challenge: string; solution: string; }[];
-  dailyMaxExpense?: number;
-  totalCost?: number;
+  dailyMaxExpense: number;
+  totalCost: number;
   rawLlmOutput?: string;
 }
 
@@ -712,7 +711,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
   useEffect(() => {
     if (existingGoal) {
       setFormData({
-        targetAmount: existingGoal.target_amount ? String(existingGoal.target_amount) : '',
+        targetAmount: existingGoal.totalCost ? String(existingGoal.totalCost) : '',
         monthlyIncome: String(existingGoal.monthly_income),
         description: existingGoal.description
       });
@@ -720,10 +719,9 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       // If the goal has analysis data, set it
       if (existingGoal.time_to_goal && existingGoal.daily_savings) {
         setAnalysis({
-          timeToGoal: existingGoal.time_to_goal,
           dailySavings: existingGoal.daily_savings,
           dailyMaxExpense: existingGoal.daily_max_expense,
-          totalCost: existingGoal.target_amount || (existingGoal.time_to_goal * existingGoal.daily_savings),
+          totalCost: existingGoal.totalCost,
           suggestions: [],
           actionableSteps: [],
           challenges: []
@@ -821,7 +819,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         setStreamComplete(true);
         
         // Calculate total cost from timeToGoal and dailySavings
-        let totalCost = analysisResult.timeToGoal * analysisResult.dailySavings;
+        let totalCost = analysisResult.totalCost;
         
         // If savings type with target amount, use that as priority
         if (type === 'savings' && formData.targetAmount) {
@@ -878,10 +876,10 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       const goalData = {
         user_id: userId,
         type,
-        target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : null,
+        target_amount: type === 'savings' ? parseFloat(formData.targetAmount) : analysis?.totalCost,
         monthly_income: parseFloat(formData.monthlyIncome),
         description: formData.description,
-        time_to_goal: analysis?.timeToGoal,
+        time_to_goal: ((type === 'savings' ? parseFloat(formData.targetAmount) : analysis?.totalCost!) / analysis?.dailySavings!).toFixed(0),
         daily_savings: analysis?.dailySavings,
         daily_max_expense: analysis?.dailyMaxExpense,
         status: 'active'
@@ -969,14 +967,12 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           <div className="section">
             <div className="title">{t('overview')}</div>
             <div className="content metrics">
-              {analysis.totalCost && (
-                <div className="metric">
-                  <div className="value">¥{analysis.totalCost.toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
+            <div className="metric">
+                  <div className="value">¥{analysis.totalCost}</div>
                   <div className="label">{t('totalCost')}</div>
                 </div>
-              )}
               <div className="metric">
-                <div className="value">{analysis.timeToGoal} {t('days')}</div>
+                <div className="value">{Math.floor(analysis.totalCost / analysis.dailySavings)} {t('days')}</div>
                 <div className="label">{t('estimatedTime')}</div>
               </div>
               <div className="metric">
