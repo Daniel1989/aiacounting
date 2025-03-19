@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
     // Prepare records for insertion
     const records = items.map((item: RecordItem) => {
       // Find matching tag for the category
@@ -57,21 +56,17 @@ export async function POST(request: NextRequest) {
       
       // Use the first matching tag or default to null
       const tagId = matchingTags.length > 0 ? matchingTags[0].id : null;
-      if(!tagId) {
-        return null;
-      }
       return {
         user_id: user.id,
         amount: item.amount,
         // type: item.type === 'expense' ? 'cost' : 'income',
         category: item.type === 'expense' ? 'cost' : 'income',
-        tag_id: tagId,
+        tag_id: tagId || 93,
         note: item.description,
         // date: item.date || new Date().toISOString().split('T')[0],
         created_at: new Date().toISOString()
       };
     });
-
     // Filter out null records
     const filteredRecords = records.filter(record => record !== null);
 

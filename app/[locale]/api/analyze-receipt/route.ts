@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
     // Extract unique categories
     const expenseCategories = [...new Set(
       tags
-        .filter(tag => tag.type === 'expense')
-        .map(tag => tag.category)
+        .filter(tag => tag.category === 'cost')
+        .map(tag => tag.name)
     )];
 
     const incomeCategories = [...new Set(
       tags
-        .filter(tag => tag.type === 'income')
-        .map(tag => tag.category)
+        .filter(tag => tag.category === 'income')
+        .map(tag => tag.name)
     )];
 
     // Prepare the prompt for OpenAI
