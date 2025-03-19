@@ -20,6 +20,7 @@ interface Goal {
   description: string;
   time_to_goal: number;
   daily_savings: number;
+  daily_max_expense: number;
   status: string;
   created_at: string;
 }
@@ -247,6 +248,8 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
   const router = useRouter();
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [actualSpending, setActualSpending] = useState<number>(0);
+  const [todaySpending, setTodaySpending] = useState<number>(0);
   
   useEffect(() => {
     const fetchActiveGoal = async () => {
@@ -267,6 +270,46 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
           }
         } else if (data) {
           setActiveGoal(data);
+          
+          // If we have an active goal, fetch the spending since it was created
+          if (data.created_at) {
+            // Get total spending since goal creation
+            const { data: spendingData, error: spendingError } = await supabase
+              .from('records')
+              .select('amount')
+              .eq('user_id', userId)
+              .eq('type', 'cost')
+              .gte('created_at', data.created_at)
+              .order('created_at', { ascending: false });
+            
+            if (spendingError) {
+              console.error('Error fetching spending:', spendingError);
+            } else if (spendingData) {
+              // Calculate total spending
+              const totalSpending = spendingData.reduce((sum, record) => sum + record.amount, 0);
+              setActualSpending(totalSpending);
+            }
+            
+            // Get today's spending
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const { data: todayData, error: todayError } = await supabase
+              .from('records')
+              .select('amount')
+              .eq('user_id', userId)
+              .eq('type', 'cost')
+              .gte('created_at', today.toISOString())
+              .order('created_at', { ascending: false });
+            
+            if (todayError) {
+              console.error('Error fetching today spending:', todayError);
+            } else if (todayData) {
+              // Calculate today's spending
+              const todayTotal = todayData.reduce((sum, record) => sum + record.amount, 0);
+              setTodaySpending(todayTotal);
+            }
+          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -323,12 +366,70 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
     }
   };
   
-  // Calculate progress percentage
+  // Calculate progress percentage based on daily max expense and days passed
   const calculateProgress = () => {
-    if (!activeGoal || !activeGoal.target_amount) return 0;
+    if (!activeGoal || !activeGoal.target_amount || !activeGoal.daily_max_expense) return 0;
     
-    // For demo purposes, let's assume 35% progress
-    return 35;
+    // Calculate days passed since the goal was created
+    const startDate = new Date(activeGoal.created_at);
+    const currentDate = new Date();
+    const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Calculate theoretical saved amount: daily max expense * days passed
+    const theoreticalSaved = activeGoal.daily_max_expense * daysPassed;
+    
+    // Calculate actual saved: theoretical saved - actual spending
+    const actualSaved = theoreticalSaved - actualSpending;
+    
+    // Calculate progress as percentage of target amount
+    const progressPercentage = (actualSaved / activeGoal.target_amount) * 100;
+    
+    // Ensure progress doesn't exceed 100%
+    return Math.min(Math.max(progressPercentage, 0), 100);
+  };
+  
+  // Calculate daily metrics for display
+  const calculateDailyMetrics = () => {
+    if (!activeGoal) return { recommendedExpense: 0, todayExpense: 0, savings: 0 };
+    
+    // Use the daily max expense as the recommended expense
+    const recommendedExpense = activeGoal.daily_max_expense;
+    
+    // Use actual today's spending from the database
+    const todayExpense = todaySpending;
+    
+    // Calculate savings (positive if under budget, negative if over)
+    const savings = recommendedExpense - todayExpense;
+    
+    return { recommendedExpense, todayExpense, savings };
+  };
+  
+  // Calculate estimated completion date
+  const calculateCompletionDate = () => {
+    if (!activeGoal || !activeGoal.target_amount || !activeGoal.daily_savings) {
+      return null;
+    }
+    
+    // Calculate days since goal creation
+    const startDate = new Date(activeGoal.created_at);
+    const currentDate = new Date();
+    const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Calculate progress as amount saved
+    const progress = calculateProgress();
+    const savedAmount = (activeGoal.target_amount * progress) / 100;
+    
+    // Calculate remaining amount
+    const remainingAmount = activeGoal.target_amount - savedAmount;
+    
+    // Calculate days needed to save remaining amount
+    const daysRemaining = Math.ceil(remainingAmount / activeGoal.daily_savings);
+    
+    // Calculate estimated completion date
+    const completionDate = new Date(currentDate);
+    completionDate.setDate(completionDate.getDate() + daysRemaining);
+    
+    return completionDate;
   };
   
   if (isLoading) {
@@ -343,6 +444,8 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
     const progress = calculateProgress();
     const targetAmount = activeGoal.target_amount || 0;
     const progressAmount = (targetAmount * progress) / 100;
+    const { recommendedExpense, todayExpense, savings } = calculateDailyMetrics();
+    const completionDate = calculateCompletionDate();
     
     return (
       <Container>
@@ -355,18 +458,27 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
           
           <PlanSection>
             <div className="title">{t('targetProgress')}</div>
-            <div className="amount">¥ {targetAmount.toLocaleString()}</div>
-            <div className="progress-text">{t('completed')} {progress}%</div>
+            <div className="amount">¥{targetAmount.toLocaleString()}</div>
+            <div className="progress-text">{t('completed')} {progress.toFixed(1)}%</div>
             <div className="progress-container">
               <div className="progress-bar" style={{ width: `${progress}%` }} />
             </div>
+            {completionDate && (
+              <div className="progress-text" style={{ marginTop: '8px' }}>
+                {t('estimatedCompletion')}: {completionDate.toLocaleDateString()}
+              </div>
+            )}
           </PlanSection>
           
           <PlanSection>
             <div className="title">{t('monthStatus')}</div>
             <div className="status-item">
               <CheckCircle2 size={16} className="icon" />
-              <div className="text">{t('aheadOfPlan')} 2 {t('days')}</div>
+              <div className="text">
+                {savings >= 0 
+                  ? `${t('aheadOfPlan')} ${Math.floor(savings / activeGoal.daily_savings)} ${t('days')}` 
+                  : `${t('behindPlan')} ${Math.ceil(Math.abs(savings) / activeGoal.daily_savings)} ${t('days')}`}
+              </div>
             </div>
           </PlanSection>
           
@@ -374,15 +486,17 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
             <div className="title">{t('dailyRecords')}</div>
             <div className="record">
               <div className="label">{t('todayExpense')}</div>
-              <div className="value">¥ 120</div>
+              <div className="value">¥{todayExpense.toLocaleString()}</div>
             </div>
             <div className="record">
               <div className="label">{t('recommendedExpense')}</div>
-              <div className="value">¥ 150</div>
+              <div className="value">¥{recommendedExpense.toLocaleString()}</div>
             </div>
             <div className="record">
               <div className="label">{t('savings')}</div>
-              <div className="value saving">¥ 30</div>
+              <div className={`value ${savings >= 0 ? 'saving' : ''}`}>
+                ¥{savings.toLocaleString()}
+              </div>
             </div>
           </PlanSection>
         </PlanStatusContainer>

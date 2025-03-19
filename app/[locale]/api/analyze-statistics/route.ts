@@ -5,7 +5,10 @@ import { getTranslations } from 'next-intl/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
 });
+
+const model = process.env.OPENAI_MODEL;
 
 export async function POST(request: NextRequest) {
   try {
@@ -143,7 +146,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: "You are a helpful financial advisor." },
         { role: "user", content: prompt }
       ],
-      model: "gpt-4-turbo-preview",
+      model: model!,
       response_format: { type: "json_object" },
     });
 

@@ -226,7 +226,11 @@
     "streaming": "Streaming",
     "errorStreamAnalysis": "Error in streaming analysis",
     "errorFinalAnalysis": "Error in final analysis",
-    "processingFinalAnalysis": "Processing final analysis..."
+    "processingFinalAnalysis": "Processing final analysis...",
+    "estimatedCompletion": "Estimated Completion Date",
+    "totalCost": "Total Cost",
+    "dailyMaxExpense": "Daily Max Expense",
+    "rawAnalysis": "Plan"
   },
   "imageUpload": {
     "uploadReceipt": "Upload Receipt Photo",

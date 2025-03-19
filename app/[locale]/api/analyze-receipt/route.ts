@@ -6,7 +6,11 @@ import OpenAI from 'openai';
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
 });
+
+const model = process.env.OPENAI_VISION_MODEL;
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -111,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: model!,
       messages: [
         {
           role: "system",

@@ -4,7 +4,10 @@ import { NextResponse } from 'next/server';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
 });
+
+const model = process.env.OPENAI_MODEL;
 
 const deepseek = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY,
@@ -197,11 +200,10 @@ Respond in **${language}**.
         },
       });
     } else {
-      console.log('prompt', prompt);
       // Regular API call without streaming - use the original implementation
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
-        model: "gpt-4-turbo-preview",
+        model: model!,
         response_format: { type: "json_object" },
       });
       

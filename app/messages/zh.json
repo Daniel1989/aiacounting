@@ -226,7 +226,11 @@
     "streaming": "响应中",
     "errorStreamAnalysis": "流式分析出错",
     "errorFinalAnalysis": "最终分析出错",
-    "processingFinalAnalysis": "处理最终分析中..."
+    "processingFinalAnalysis": "处理最终分析中...",
+    "estimatedCompletion": "预计完成日期",
+    "totalCost": "总成本",
+    "dailyMaxExpense": "每日最高支出",
+    "rawAnalysis": "计划"
   },
   "imageUpload": {
     "uploadReceipt": "上传收据照片",
