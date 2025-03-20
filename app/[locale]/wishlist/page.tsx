@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/server';
 import WishlistContent from '@/app/components/wishlist/wishlist-content';
+import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
+import { getCurrentUser } from '@/app/lib/server';
 
 interface WishlistPageProps {
   params: Promise<{
@@ -28,5 +30,18 @@ export default async function WishlistPage({ params }: WishlistPageProps) {
     redirect(`/${locale}/login`);
   }
   
-  return <WishlistContent userId={user.id} locale={locale} />;
+  // Get current user with auth_id for checking invite code
+  const currentUser = await getCurrentUser();
+  
+  // Check if the user has activated an invite code
+  let hasActivatedInviteCode = false;
+  if (currentUser && currentUser.auth_id) {
+    hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
+  }
+  
+  return <WishlistContent 
+    userId={user.id} 
+    locale={locale} 
+    hasActivatedInviteCode={hasActivatedInviteCode} 
+  />;
 } 

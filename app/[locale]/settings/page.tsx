@@ -8,11 +8,15 @@ import { LogoutButton } from '@/app/components/auth/logout-button';
 import { DbUser } from '@/app/lib/supabase/database';
 import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
 
+// Admin user auth ID - this would typically be stored in environment variables
+const ADMIN_AUTH_ID = process.env.ADMIN_AUTH_ID || '';
+
 interface SettingsPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: { admin?: string };
 }
 
-export default async function SettingsPage({ params }: SettingsPageProps) {
+export default async function SettingsPage({ params, searchParams }: SettingsPageProps) {
   // In Next.js 15, we need to await the params
   const { locale } = await params;
   
@@ -35,6 +39,14 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
     hasUsedInviteCode = await hasUserUsedInviteCode(user.auth_id);
   }
 
+  // Check if user is admin by comparing auth_id with the admin auth ID
+  // Also check for the admin query parameter route for extra security
+  const isAdmin = Boolean(
+    user?.auth_id && 
+    user.auth_id === ADMIN_AUTH_ID && 
+    searchParams.admin === 'true'
+  );
+
   return (
     <div className="container mx-auto px-4 py-8 pb-20">
       <h1 className="text-2xl font-bold mb-6">{t('settings')}</h1>
@@ -56,12 +68,14 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       </section>
       
       {/* Admin Invite Code Generation - Only visible to admin */}
-      <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">{t('adminInviteCodes')}</h2>
-        <div className="bg-white rounded-lg shadow p-6">
-          <AdminInviteCodes userId={userId} />
-        </div>
-      </section>
+      {isAdmin && (
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">{t('adminInviteCodes')}</h2>
+          <div className="bg-white rounded-lg shadow p-6">
+            <AdminInviteCodes userId={userId} />
+          </div>
+        </section>
+      )}
       
       {/* Account Actions Section */}
       <section className="mb-8">

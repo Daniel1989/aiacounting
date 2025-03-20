@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/server';
 import GoalSettingForm from '@/app/components/wishlist/goal-setting-form';
+import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
+import { getCurrentUser } from '@/app/lib/server';
 
 interface GoalSettingPageProps {
   params: Promise<{
@@ -25,7 +27,7 @@ export async function generateMetadata(props: any) {
   } else if (params.type === 'shopping') {
     titleSuffix = t('shopping.title');
   } else if (params.type === 'savings') {
-    titleSuffix = t('savings.title');
+    titleSuffix = t('saving.title');
   }
   
   return {
@@ -52,6 +54,21 @@ export default async function GoalSettingPage(props: any) {
     redirect(`/${locale}/login`);
   }
   
+  // Check if the user has activated an invite code if type is shopping or savings
+  if (type === 'shopping' || type === 'savings') {
+    const currentUser = await getCurrentUser();
+    
+    let hasActivatedInviteCode = false;
+    if (currentUser && currentUser.auth_id) {
+      hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
+    }
+    
+    // Redirect to wishlist page if premium feature not activated
+    if (!hasActivatedInviteCode) {
+      redirect(`/${locale}/wishlist`);
+    }
+  }
+  
   let existingGoal = null;
   
   if (edit) {
@@ -63,6 +80,20 @@ export default async function GoalSettingPage(props: any) {
       .single();
     
     existingGoal = goalData;
+    
+    // If editing a premium goal type without premium access, redirect
+    if ((existingGoal?.type === 'shopping' || existingGoal?.type === 'savings')) {
+      const currentUser = await getCurrentUser();
+      
+      let hasActivatedInviteCode = false;
+      if (currentUser && currentUser.auth_id) {
+        hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
+      }
+      
+      if (!hasActivatedInviteCode) {
+        redirect(`/${locale}/wishlist`);
+      }
+    }
   }
   
   return <GoalSettingForm 

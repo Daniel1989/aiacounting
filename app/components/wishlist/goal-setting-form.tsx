@@ -743,7 +743,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       setIsProcessingFinal(false);
 
       // Step 1: Start AI analysis with event-stream for raw output
-      const streamResponse = await fetch(`/${locale}/api/analyze-goal`, {
+      const streamResponse = await fetch(`/${locale}/api/analyze-goal-stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

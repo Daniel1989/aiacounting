@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
-import { Plane, ShoppingBag, PiggyBank, Circle, CheckCircle2 } from 'lucide-react';
+import { Plane, ShoppingBag, PiggyBank, Circle, CheckCircle2, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 
 interface WishlistContentProps {
   userId: string;
   locale: string;
+  hasActivatedInviteCode: boolean;
 }
 
 interface Goal {
@@ -243,7 +244,37 @@ const ActionButtons = styled.div`
   }
 `;
 
-export default function WishlistContent({ userId, locale }: WishlistContentProps) {
+// New styled component for locked features
+const LockedOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  
+  > .lock-icon {
+    margin-bottom: 8px;
+  }
+  
+  > .lock-text {
+    font-size: 14px;
+    text-align: center;
+    padding: 0 12px;
+  }
+`;
+
+const GoalCardWrapper = styled.div`
+  position: relative;
+`;
+
+export default function WishlistContent({ userId, locale, hasActivatedInviteCode }: WishlistContentProps) {
   const t = useTranslations('wishlist');
   const router = useRouter();
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
@@ -321,30 +352,18 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
     fetchActiveGoal();
   }, [userId]);
   
-  const goals = [
-    {
-      id: 'travel',
-      icon: <Plane size={24} />,
-      title: t('travel.title'),
-      description: t('travel.description'),
-    },
-    {
-      id: 'shopping',
-      icon: <ShoppingBag size={24} />,
-      title: t('shopping.title'),
-      description: t('shopping.description'),
-    },
-    {
-      id: 'savings',
-      icon: <PiggyBank size={24} />,
-      title: t('saving.title'),
-      description: t('saving.description'),
-    },
-  ];
-  
-  const handleAdjustPlan = () => {
+  const handleSelectGoal = (type: string) => {
+    // For shopping and savings, check if user has activated an invite code
+    if ((type === 'shopping' || type === 'savings') && !hasActivatedInviteCode) {
+      // Don't navigate if premium feature is locked
+      return;
+    }
+    
+    // If user has an active goal, show it instead of creating a new one
     if (activeGoal) {
-      router.push(`/${locale}/wishlist/${activeGoal.type}?edit=${activeGoal.id}`);
+      router.push(`/${locale}/wishlist`);
+    } else {
+      router.push(`/${locale}/wishlist/${type}`);
     }
   };
   
@@ -435,7 +454,9 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
   if (isLoading) {
     return (
       <Container>
-        <div>{t('loading')}</div>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">{t('loading')}</p>
+        </div>
       </Container>
     );
   }
@@ -502,7 +523,7 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
         </PlanStatusContainer>
         
         <ActionButtons>
-          <button className="secondary" onClick={handleAdjustPlan}>
+          <button className="secondary" onClick={() => router.push(`/${locale}/wishlist/${activeGoal.type}?edit=${activeGoal.id}`)}>
             {t('adjustPlan')}
           </button>
           <button className="primary" onClick={handleAbandonPlan}>
@@ -514,27 +535,60 @@ export default function WishlistContent({ userId, locale }: WishlistContentProps
   }
   
   return (
-    <Container> 
+    <Container>
       <Header>
         <div className="title">{t('title')}</div>
         <div className="subtitle">{t('subtitle')}</div>
       </Header>
       
       <GoalList>
-        {goals.map((goal) => (
-          <GoalCard 
-            key={goal.id}
-            onClick={() => router.push(`/${locale}/wishlist/${goal.id}`)}
-          >
-            <div className={`icon-container ${goal.id}`}>
-              {goal.icon}
+        <GoalCardWrapper>
+          <GoalCard onClick={() => handleSelectGoal('travel')}>
+            <div className="icon-container travel">
+              <Plane size={24} />
             </div>
             <div className="content">
-              <div className="title">{goal.title}</div>
-              <div className="description">{goal.description}</div>
+              <div className="title">{t('travel.title')}</div>
+              <div className="description">{t('travel.description')}</div>
             </div>
           </GoalCard>
-        ))}
+        </GoalCardWrapper>
+        
+        <GoalCardWrapper>
+          <GoalCard onClick={() => handleSelectGoal('shopping')}>
+            <div className="icon-container shopping">
+              <ShoppingBag size={24} />
+            </div>
+            <div className="content">
+              <div className="title">{t('shopping.title')}</div>
+              <div className="description">{t('shopping.description')}</div>
+            </div>
+          </GoalCard>
+          {!hasActivatedInviteCode && (
+            <LockedOverlay>
+              <Lock className="lock-icon" size={24} />
+              <div className="lock-text">{t('premiumFeature')}</div>
+            </LockedOverlay>
+          )}
+        </GoalCardWrapper>
+        
+        <GoalCardWrapper>
+          <GoalCard onClick={() => handleSelectGoal('savings')}>
+            <div className="icon-container savings">
+              <PiggyBank size={24} />
+            </div>
+            <div className="content">
+              <div className="title">{t('saving.title')}</div>
+              <div className="description">{t('saving.description')}</div>
+            </div>
+          </GoalCard>
+          {!hasActivatedInviteCode && (
+            <LockedOverlay>
+              <Lock className="lock-icon" size={24} />
+              <div className="lock-text">{t('premiumFeature')}</div>
+            </LockedOverlay>
+          )}
+        </GoalCardWrapper>
       </GoalList>
     </Container>
   );
