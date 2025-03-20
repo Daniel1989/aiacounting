@@ -5,7 +5,6 @@ import { InviteCodeSettings } from '@/app/components/settings/invite-code-settin
 import { AdminInviteCodes } from '@/app/components/settings/admin-invite-codes';
 import { LegalLinks } from '@/app/components/settings/legal-links';
 import { LogoutButton } from '@/app/components/auth/logout-button';
-import { DbUser } from '@/app/lib/supabase/database';
 import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
 
 // Admin user auth ID - this would typically be stored in environment variables
@@ -16,7 +15,7 @@ interface SettingsPageProps {
   searchParams: { admin?: string };
 }
 
-export default async function SettingsPage({ params, searchParams }: SettingsPageProps) {
+export default async function SettingsPage({ params, searchParams }: any) {
   // In Next.js 15, we need to await the params
   const { locale } = await params;
   
