@@ -28,14 +28,14 @@ export function ResponsiveHome({ children }: ResponsiveHomeProps) {
   }
 
   // Desktop view - show QR code
-  if (!isMobile) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
-        <h1 className="text-2xl font-semibold mb-8">{t('scanToAccess')}</h1>
-        <QRCodeDisplay url={typeof window !== 'undefined' ? window.location.href : ''} size={250} />
-      </div>
-    );
-  }
+  // if (!isMobile) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
+  //       <h1 className="text-2xl font-semibold mb-8">{t('scanToAccess')}</h1>
+  //       <QRCodeDisplay url={typeof window !== 'undefined' ? window.location.href : ''} size={250} />
+  //     </div>
+  //   );
+  // }
 
   // Mobile view - show actual content
   return <>{children}</>;
