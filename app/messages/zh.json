@@ -110,6 +110,8 @@
     "invalidInviteCode": "无效或过期的邀请码",
     "inviteCodeSuccess": "邀请码应用成功",
     "submitInviteCode": "提交",
+    "inviteCodeActivated": "高级功能已激活",
+    "inviteCodeActivatedDescription": "您已成功通过邀请码激活高级功能。享受增强的体验吧！",
     "adminInviteCodes": "生成邀请码",
     "generateInviteCode": "创建新邀请码",
     "generateCode": "生成邀请码",

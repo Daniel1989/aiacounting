@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
 interface InviteCodeSettingsProps {
   userId: string | null;
+  hasUsedInviteCode: boolean;
 }
 
-export function InviteCodeSettings({ userId }: InviteCodeSettingsProps) {
+export function InviteCodeSettings({ userId, hasUsedInviteCode }: InviteCodeSettingsProps) {
   const t = useTranslations('settings');
   const commonT = useTranslations('common');
   const router = useRouter();
@@ -22,6 +23,12 @@ export function InviteCodeSettings({ userId }: InviteCodeSettingsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [hasActivatedCode, setHasActivatedCode] = useState(hasUsedInviteCode);
+  
+  // Update state when prop changes
+  useEffect(() => {
+    setHasActivatedCode(hasUsedInviteCode);
+  }, [hasUsedInviteCode]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +67,7 @@ export function InviteCodeSettings({ userId }: InviteCodeSettingsProps) {
       // Success
       setSuccess(t('inviteCodeSuccess'));
       setInviteCode('');
+      setHasActivatedCode(true);
       
       // Refresh the page after a short delay
       setTimeout(() => {
@@ -77,6 +85,23 @@ export function InviteCodeSettings({ userId }: InviteCodeSettingsProps) {
     return (
       <div className="text-center py-4">
         <p className="text-red-500">{t('notLoggedIn')}</p>
+      </div>
+    );
+  }
+  
+  // Show different UI if the user has already used an invite code
+  if (hasActivatedCode) {
+    return (
+      <div className="flex flex-col items-center py-6 text-center">
+        <div className="mb-4 text-emerald-500">
+          <Sparkles className="w-12 h-12" />
+        </div>
+        <h3 className="text-lg font-medium text-emerald-700 mb-2">
+          {t('inviteCodeActivated')}
+        </h3>
+        <p className="text-gray-600">
+          {t('inviteCodeActivatedDescription')}
+        </p>
       </div>
     );
   }
@@ -99,9 +124,6 @@ export function InviteCodeSettings({ userId }: InviteCodeSettingsProps) {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('inviteCode')}
-          </label>
           <input
             id="inviteCode"
             type="text"

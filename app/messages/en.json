@@ -110,6 +110,8 @@
     "invalidInviteCode": "Invalid or expired invite code",
     "inviteCodeSuccess": "Invite code applied successfully",
     "submitInviteCode": "Submit",
+    "inviteCodeActivated": "Premium Features Activated",
+    "inviteCodeActivatedDescription": "You have successfully activated premium features with an invite code. Enjoy your enhanced experience!",
     "adminInviteCodes": "Generate Invite Codes",
     "generateInviteCode": "Create New Invite Code",
     "generateCode": "Generate Code",

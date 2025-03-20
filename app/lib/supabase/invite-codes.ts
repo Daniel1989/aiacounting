@@ -69,4 +69,32 @@ export async function getInviteCodesUsedByUser(userId: string): Promise<InviteCo
     console.error('Error in getInviteCodesUsedByUser:', error);
     return [];
   }
+}
+
+/**
+ * Checks if a user has used any invite code
+ */
+export async function hasUserUsedInviteCode(userId: string): Promise<boolean> {
+  if (!userId) {
+    return false;
+  }
+
+  try {
+    const supabase = await createClient();
+    
+    const { count, error } = await supabase
+      .from('invite_codes')
+      .select('*', { count: 'exact', head: true })
+      .eq('used_by', userId);
+    
+    if (error) {
+      console.error('Error checking if user used invite code:', error);
+      return false;
+    }
+    
+    return (count || 0) > 0;
+  } catch (error) {
+    console.error('Error in hasUserUsedInviteCode:', error);
+    return false;
+  }
 } 

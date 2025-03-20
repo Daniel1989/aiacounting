@@ -86,7 +86,6 @@ export function AdminInviteCodes({ userId }: AdminInviteCodesProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">{t('generateInviteCode')}</h3>
         
         {error && (
           <div className="p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm flex items-start">

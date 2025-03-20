@@ -6,6 +6,7 @@ import { AdminInviteCodes } from '@/app/components/settings/admin-invite-codes';
 import { LegalLinks } from '@/app/components/settings/legal-links';
 import { LogoutButton } from '@/app/components/auth/logout-button';
 import { DbUser } from '@/app/lib/supabase/database';
+import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
 
 interface SettingsPageProps {
   params: Promise<{ locale: string }>;
@@ -27,6 +28,12 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   // Since we're using redirection, if we get here, we have a valid user
   // Only pass the user ID to the client component to avoid serialization issues
   const userId = user?.id || null;
+  
+  // Check if the user has used any invite code
+  let hasUsedInviteCode = false;
+  if (user && user.auth_id) {
+    hasUsedInviteCode = await hasUserUsedInviteCode(user.auth_id);
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 pb-20">
@@ -44,7 +51,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">{t('inviteCode')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
-          <InviteCodeSettings userId={userId} />
+          <InviteCodeSettings userId={userId} hasUsedInviteCode={hasUsedInviteCode} />
         </div>
       </section>
       
