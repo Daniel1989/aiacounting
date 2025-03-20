@@ -1,6 +1,8 @@
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/app/lib/server';
 import { UserProfileSettings } from '@/app/components/settings/user-profile-settings';
+import { InviteCodeSettings } from '@/app/components/settings/invite-code-settings';
+import { AdminInviteCodes } from '@/app/components/settings/admin-invite-codes';
 import { LegalLinks } from '@/app/components/settings/legal-links';
 import { LogoutButton } from '@/app/components/auth/logout-button';
 import { DbUser } from '@/app/lib/supabase/database';
@@ -35,6 +37,22 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         <h2 className="text-xl font-semibold mb-4">{t('profile')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
           <UserProfileSettings userId={userId} user={null} />
+        </div>
+      </section>
+      
+      {/* Invite Code Section */}
+      <section className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">{t('inviteCode')}</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <InviteCodeSettings userId={userId} />
+        </div>
+      </section>
+      
+      {/* Admin Invite Code Generation - Only visible to admin */}
+      <section className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">{t('adminInviteCodes')}</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+          <AdminInviteCodes userId={userId} />
         </div>
       </section>
       

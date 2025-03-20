@@ -3,6 +3,7 @@ import { createClient } from './server';
 export interface DbUser {
   id: string;
   email: string;
+  auth_id: string;
   username: string;
   created_at: string;
   updated_at: string;
