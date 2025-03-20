@@ -61,11 +61,12 @@ export function LoginForm({ redirectTo }: any) {
           // Refresh to ensure the session is properly loaded
           console.log('Refreshing...');
           // Redirect to the specified URL or home page
-          if (redirectTo) {
-            router.push(redirectTo);
-          } else {
-            router.push(`/${locale}`);
-          }
+          // if (redirectTo) {
+          //   router.push(redirectTo);
+          // } else {
+          //   router.push(`/${locale}`);
+          // }
+          window.location.href = `/${locale}`
         }, 3000);
       } else {
         // For registration, use the non-localized callback route

@@ -699,14 +699,14 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
   const [streamedResponse, setStreamedResponse] = useState<string>('');
   const [streamComplete, setStreamComplete] = useState(false);
   const streamContentRef = useRef<HTMLDivElement>(null);
-  
+
   // Automatically scroll to the bottom of the stream content as new content comes in
   useEffect(() => {
     if (streamContentRef.current && !streamComplete) {
       streamContentRef.current.scrollTop = streamContentRef.current.scrollHeight;
     }
   }, [streamedResponse, streamComplete]);
-  
+
   // Initialize form with existing goal data if available
   useEffect(() => {
     if (existingGoal) {
@@ -715,7 +715,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         monthlyIncome: String(existingGoal.monthly_income),
         description: existingGoal.description
       });
-      
+
       // If the goal has analysis data, set it
       if (existingGoal.time_to_goal && existingGoal.daily_savings) {
         setAnalysis({
@@ -729,19 +729,19 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       }
     }
   }, [existingGoal]);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (isSubmitting) return;
-    
+
     try {
       setIsSubmitting(true);
       setIsAnalyzing(true);
       setStreamedResponse('');
       setStreamComplete(false);
       setIsProcessingFinal(false);
-      
+
       // Step 1: Start AI analysis with event-stream for raw output
       const streamResponse = await fetch(`/${locale}/api/analyze-goal`, {
         method: 'POST',
@@ -757,31 +757,31 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           locale,
         }),
       });
-      
+
       if (!streamResponse.ok) {
         throw new Error('Stream analysis failed');
       }
-      
+
       // Process the event stream to collect raw LLM output
       let rawLlmOutput = '';
       if (streamResponse.headers.get('Content-Type')?.includes('text/event-stream')) {
         const reader = streamResponse.body?.getReader();
         const decoder = new TextDecoder();
-        
+
         // Process the event stream
         if (reader) {
           try {
             while (true) {
               const { done, value } = await reader.read();
-              
+
               if (done) {
                 // setStreamComplete(true);
                 break;
               }
-              
+
               // Decode the chunk
               const chunk = decoder.decode(value, { stream: true });
-              
+
               rawLlmOutput += chunk;
               setStreamedResponse(prev => prev + chunk);
             }
@@ -791,11 +791,11 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           }
         }
       }
-      
+
       // Step 2: Use the original API with the raw LLM output as context
       if (rawLlmOutput) {
         setIsProcessingFinal(true);
-        
+
         const finalResponse = await fetch(`/${locale}/api/analyze-goal`, {
           method: 'POST',
           headers: {
@@ -810,35 +810,35 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             locale: locale,
           }),
         });
-        
+
         if (!finalResponse.ok) {
           throw new Error('Final analysis failed');
         }
-        
+
         const analysisResult = await finalResponse.json();
         setStreamComplete(true);
-        
+
         // Calculate total cost from timeToGoal and dailySavings
         let totalCost = analysisResult.totalCost;
-        
+
         // If savings type with target amount, use that as priority
         if (type === 'savings' && formData.targetAmount) {
           totalCost = parseFloat(formData.targetAmount);
         }
-        
+
         setAnalysis({
-          ...analysisResult, 
+          ...analysisResult,
           rawLlmOutput,
           totalCost
         });
-        
+
         setIsProcessingFinal(false);
       } else {
         throw new Error('No raw output obtained from stream');
       }
-      
+
       setIsAnalyzing(false);
-      
+
     } catch (error) {
       console.error('Error:', error);
       if ((error as Error).message === 'Final analysis failed') {
@@ -852,12 +852,12 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       setIsSubmitting(false);
     }
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const isValid = () => {
     if (type === 'savings') {
       return (
@@ -872,7 +872,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
   const handleConfirm = async () => {
     try {
       const supabase = createClient();
-      
+
       const goalData = {
         user_id: userId,
         type,
@@ -884,28 +884,28 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         daily_max_expense: analysis?.dailyMaxExpense,
         status: 'active'
       };
-      
+
       if (existingGoal) {
         // Update existing goal
         const { error } = await supabase
           .from('goals')
           .update(goalData)
           .eq('id', existingGoal.id);
-        
+
         if (error) throw error;
-        
+
         toast.success(t('goalUpdated'));
       } else {
         // Create new goal
         const { error } = await supabase
           .from('goals')
           .insert(goalData);
-        
+
         if (error) throw error;
-        
+
         toast.success(t('goalCreated'));
       }
-      
+
       router.push(`/${locale}/wishlist`);
     } catch (error) {
       console.error('Error saving goal:', error);
@@ -913,7 +913,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
     }
   };
 
-  
+
   if (isAnalyzing) {
     return (
       <Container>
@@ -923,11 +923,11 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             {isProcessingFinal ? t('processingFinalAnalysis') : t('analyzing')}
           </div>
           <div className="subtext">
-            {isProcessingFinal 
-              ? t('analyzingDescription') 
+            {isProcessingFinal
+              ? t('analyzingDescription')
               : t('analyzingDescription')}
           </div>
-          
+
           {streamedResponse && (
             <div className="streaming-container">
               <div className="stream-title">
@@ -939,12 +939,12 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                   </span>
                 )}
               </div>
-              <div 
+              <div
                 className={`stream-content ${!streamComplete ? 'is-streaming' : ''}`}
                 ref={streamContentRef}
               >
-                <ReactMarkdown 
-                  remarkPlugins={[remarkGfm]} 
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                 >
                   {streamedResponse}
                 </ReactMarkdown>
@@ -955,39 +955,43 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       </Container>
     );
   }
-  
+
   if (analysis) {
     return (
       <Container>
         <Header>
           <div className="title">{existingGoal ? t('updatePlan') : t('analysisResult')}</div>
         </Header>
-        
+
         <AnalysisResult>
           <div className="section">
             <div className="title">{t('overview')}</div>
             <div className="content metrics">
-            <div className="metric">
-                  <div className="value">¥{analysis.totalCost}</div>
-                  <div className="label">{t('totalCost')}</div>
-                </div>
-              <div className="metric">
-                <div className="value">{Math.floor(analysis.totalCost / analysis.dailySavings)} {t('days')}</div>
-                <div className="label">{t('estimatedTime')}</div>
-              </div>
-              <div className="metric">
-                <div className="value">¥{analysis.dailySavings?.toFixed(2)}</div>
-                <div className="label">{t('dailySavings')}</div>
-              </div>
-              {analysis.dailyMaxExpense && (
-                <div className="metric">
-                  <div className="value">¥{analysis.dailyMaxExpense.toFixed(2)}</div>
-                  <div className="label">{t('dailyMaxExpense')}</div>
-                </div>
-              )}
+              {
+                analysis.dailySavings ? (
+                  <>
+                    <div className="metric">
+                      <div className="value">¥{analysis.totalCost}</div>
+                      <div className="label">{t('totalCost')}</div>
+                    </div>
+                    <div className="metric">
+                      <div className="value">{Math.floor(analysis.totalCost / analysis.dailySavings)} {t('days')}</div>
+                      <div className="label">{t('estimatedTime')}</div>
+                    </div>
+                    <div className="metric">
+                      <div className="value">¥{analysis.dailySavings}</div>
+                      <div className="label">{t('dailySavings')}</div>
+                    </div>
+                    <div className="metric">
+                      <div className="value">¥{analysis.dailyMaxExpense}</div>
+                      <div className="label">{t('dailyMaxExpense')}</div>
+                    </div>
+                  </>
+                ) : null
+              }
             </div>
           </div>
-          
+
           {analysis.suggestions && analysis.suggestions.length > 0 && (
             <div className="section">
               <div className="title">{t('suggestions')}</div>
@@ -998,14 +1002,14 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               </div>
             </div>
           )}
-          
+
           {/* Display raw LLM response at the bottom */}
           {analysis.rawLlmOutput && (
             <div className="section">
               <div className="title">{t('rawAnalysis')}</div>
               <div className="content raw-response">
-                <ReactMarkdown 
-                  remarkPlugins={[remarkGfm]} 
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                 >
                   {analysis.rawLlmOutput}
                 </ReactMarkdown>
@@ -1013,7 +1017,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             </div>
           )}
         </AnalysisResult>
-        
+
         <ActionButtons>
           <button className="secondary" onClick={() => setAnalysis(null)}>
             {t('reanalyze')}
@@ -1025,11 +1029,11 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
       </Container>
     );
   }
-  
+
   return (
     <Container>
       <Header>
-        <button 
+        <button
           className="back-button"
           onClick={() => router.push(`/${locale}/wishlist`)}
           type="button"
@@ -1038,7 +1042,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         </button>
         <div className="title">{existingGoal ? t('editGoal') : t('setGoal')}</div>
       </Header>
-      
+
       <Form onSubmit={handleSubmit}>
         {type === 'savings' && (
           <FormGroup>
@@ -1055,7 +1059,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             />
           </FormGroup>
         )}
-        
+
         <FormGroup>
           <div className="label">{t('monthlyIncome')}</div>
           <input
@@ -1069,7 +1073,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             min="0"
           />
         </FormGroup>
-        
+
         <FormGroup>
           <div className="label">{t('goalDescription')}</div>
           <textarea
@@ -1080,9 +1084,9 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             onChange={handleChange}
           />
         </FormGroup>
-        
-        <SubmitButton 
-          type="submit" 
+
+        <SubmitButton
+          type="submit"
           disabled={!isValid() || isSubmitting}
         >
           {existingGoal ? t('updateAnalysis') : t('startAnalysis')}
