@@ -100,6 +100,7 @@ export function HomeContent({ userId }: HomeContentProps) {
   // Fetch recent records from Supabase
   useEffect(() => {
     async function fetchRecords() {
+      console.log('fetchRecords', userId, isAuthenticated);
       if (!userId || !isAuthenticated) {
         setIsLoading(false);
         return;
