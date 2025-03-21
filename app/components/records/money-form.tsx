@@ -232,7 +232,7 @@ export function MoneyForm({ userId }: MoneyFormProps) {
       });
       
       // Refresh the page to show the updated data
-      router.refresh();
+      // router.refresh();
       
       return Promise.resolve();
     } catch (err: any) {

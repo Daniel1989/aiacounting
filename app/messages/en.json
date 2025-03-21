@@ -56,7 +56,13 @@
     "loading": "Loading records...",
     "pleaseLogin": "Please log in to view your records",
     "login": "Login",
-    "unnamed": "Unnamed"
+    "unnamed": "Unnamed",
+    "recentRecords": "Recent Records",
+    "expandRecords": "Load More Records",
+    "orSwipeUp": "or swipe up",
+    "loadingMore": "Loading more records...",
+    "noMoreRecords": "No more records to load",
+    "swipeUpForMore": "Swipe up to load more"
   },
   "records": {
     "addRecord": "Add Record",

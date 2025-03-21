@@ -56,7 +56,13 @@
     "loading": "加载记录中...",
     "pleaseLogin": "请登录查看您的记录",
     "login": "登录",
-    "unnamed": "未命名"
+    "unnamed": "未命名",
+    "recentRecords": "近期账单",
+    "expandRecords": "查看更多记录",
+    "orSwipeUp": "或上滑展开",
+    "loadingMore": "加载更多记录中...",
+    "noMoreRecords": "没有更多记录了",
+    "swipeUpForMore": "上滑加载更多"
   },
   "records": {
     "addRecord": "添加记录",
