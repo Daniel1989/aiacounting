@@ -104,62 +104,65 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
   }, [currentDate, userId]);
   
   const fetchRecords = async () => {
-    setIsLoading(true);
-    
     try {
-      // Calculate date range
-      const endDate = dayjs(currentDate);
-      const startDate = endDate.subtract(count - 1, 'day');
+      setIsLoading(true);
       
-      // Fetch income records
-      const { data: incomeData, error: incomeError } = await supabase
-        .from('records')
-        .select('amount, created_at')
-        .eq('user_id', userId)
-        .eq('category', 'income')
-        .gte('created_at', startDate.startOf('day').toISOString())
-        .lte('created_at', endDate.endOf('day').toISOString());
+      const supabase = createClient();
       
-      if (incomeError) throw incomeError;
+      // Get the first and last day of the selected month
+      const startOfMonth = dayjs(date).startOf('month');
+      const endOfMonth = dayjs(date).endOf('month');
       
-      // Fetch expense records
-      const { data: expenseData, error: expenseError } = await supabase
-        .from('records')
-        .select('amount, created_at')
-        .eq('user_id', userId)
-        .eq('category', 'cost')
-        .gte('created_at', startDate.startOf('day').toISOString())
-        .lte('created_at', endDate.endOf('day').toISOString());
+      // Get all days in the month as string dates (YYYY-MM-DD)
+      const daysInMonth = [];
+      let currentDay = startOfMonth.clone();
       
-      if (expenseError) throw expenseError;
-      
-      // Process data by day
-      const dailyRecords: DailyRecord[] = [];
-      
-      for (let i = 0; i < count; i++) {
-        const day = startDate.add(i, 'day');
-        const dayStr = day.format('MM-DD');
-        
-        // Calculate income for this day
-        const dayIncome = incomeData
-          .filter(record => dayjs(record.created_at).format('MM-DD') === dayStr)
-          .reduce((sum, record) => sum + Number(record.amount), 0);
-        
-        // Calculate expenses for this day
-        const dayExpense = expenseData
-          .filter(record => dayjs(record.created_at).format('MM-DD') === dayStr)
-          .reduce((sum, record) => sum + Number(record.amount), 0);
-        
-        dailyRecords.push({
-          date: dayStr,
-          income: dayIncome,
-          expense: dayExpense
-        });
+      while (currentDay.isBefore(endOfMonth) || currentDay.isSame(endOfMonth, 'day')) {
+        daysInMonth.push(currentDay.format('YYYY-MM-DD'));
+        currentDay = currentDay.add(1, 'day');
       }
       
-      setRecords(dailyRecords);
+      // Initialize records for each day in the month
+      const records = daysInMonth.map(day => ({
+        date: day,
+        income: 0,
+        expense: 0
+      }));
+      
+      // Query for records in the selected month
+      const { data, error } = await supabase
+        .from('records')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
+      
+      if (error) {
+        console.error('Error fetching records:', error);
+        return;
+      }
+      
+      // Aggregate records by day
+      if (data && data.length > 0) {
+        data.forEach(record => {
+          const recordDate = dayjs(record.created_at).format('YYYY-MM-DD');
+          const dayRecord = records.find(r => r.date === recordDate);
+          
+          if (dayRecord) {
+            if (record.category === 'income') {
+              dayRecord.income += record.amount;
+            } else if (record.category === 'cost') {
+              dayRecord.expense += record.amount;
+            }
+          }
+        });
+        
+        setRecords(records);
+      } else {
+        setRecords([]);
+      }
     } catch (error) {
-      console.error('Error fetching records:', error);
+      console.error('Error in fetchRecords:', error);
       setRecords([]);
     } finally {
       setIsLoading(false);

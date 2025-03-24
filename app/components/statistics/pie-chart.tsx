@@ -153,94 +153,77 @@ export function PieChart({ userId, date, type, locale }: PieChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
   
-  useEffect(() => {
-    async function fetchTagSummaries() {
+  const fetchData = async () => {
+    try {
       setIsLoading(true);
       
-      try {
-        const supabase = createClient();
-        const startOfMonth = dayjs(date).startOf('month').toISOString();
-        const endOfMonth = dayjs(date).endOf('month').toISOString();
+      const supabase = createClient();
+      
+      // Get the first and last day of the selected month
+      const startOfMonth = dayjs(date).startOf('month');
+      const endOfMonth = dayjs(date).endOf('month');
+      
+      // Fetch records with tag information
+      const { data: records, error } = await supabase
+        .from('records')
+        .select(`
+          *,
+          tags:tag_id (
+            id, 
+            name,
+            icon
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('category', type)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString());
         
-        // Fetch records with tag information
-        const { data: recordsData, error: recordsError } = await supabase
-          .from('records')
-          .select(`
-            amount,
-            tags:tag_id (
-              id,
-              name,
-              icon,
-              category
-            )
-          `)
-          .eq('user_id', userId)
-          .gte('created_at', startOfMonth)
-          .lte('created_at', endOfMonth);
+      if (error) {
+        console.error('Error fetching records:', error);
+        return;
+      }
+      
+      // Aggregate data by tag
+      const tagTotals: { [key: string]: { name: string; icon?: string; amount: number; count: number } } = {};
+      
+      records?.forEach(record => {
+        const tagName = record.tags?.name || t('unnamed');
+        const tagIcon = record.tags?.icon;
         
-        if (recordsError) throw recordsError;
-        
-        // Process records to get tag summaries
-        const tagMap = new Map<number, { tagId: number; tagName: string; tagIcon: string; amount: number }>();
-        let filteredRecords = 0;
-        
-        if (recordsData) {
-          // Filter records by type based on tag type
-          const filteredData = recordsData.filter((record: any) => {
-            return record.tags?.category === (type === 'cost' ? 'cost' : 'income');
-          });
-          
-          filteredRecords = filteredData.length;
-          
-          filteredData.forEach((record: any) => {
-            if (!record.tags) return;
-            
-            const tagId = Number(record.tags.id);
-            const amount = Number(record.amount);
-            
-            if (tagMap.has(tagId)) {
-              const existing = tagMap.get(tagId)!;
-              tagMap.set(tagId, {
-                ...existing,
-                amount: existing.amount + amount
-              });
-            } else {
-              tagMap.set(tagId, {
-                tagId,
-                tagName: record.tags.name,
-                tagIcon: record.tags.icon || 'default',
-                amount
-              });
-            }
-          });
+        if (!tagTotals[tagName]) {
+          tagTotals[tagName] = { name: tagName, icon: tagIcon, amount: 0, count: 0 };
         }
         
-        // Calculate total amount
-        const total = Array.from(tagMap.values()).reduce((sum, item) => sum + item.amount, 0);
-        setTotalAmount(total);
-        setRecordCount(filteredRecords);
-        
-        // Convert to array and calculate percentages
-        const summaries = Array.from(tagMap.values())
-          .map((item, index) => ({
-            ...item,
-            percentage: total > 0 ? (item.amount / total) * 100 : 0,
-            color: chartColors[index % chartColors.length]
-          }))
-          .sort((a, b) => b.amount - a.amount);
-        
-        setTagSummaries(summaries);
-      } catch (error) {
-        console.error('Error fetching tag summaries:', error);
-        setTagSummaries([]);
-        setTotalAmount(0);
-        setRecordCount(0);
-      } finally {
-        setIsLoading(false);
-      }
+        tagTotals[tagName].amount += record.amount;
+        tagTotals[tagName].count += 1;
+      });
+      
+      // Convert to array and sort by amount
+      const chartData = Object.values(tagTotals).sort((a, b) => b.amount - a.amount);
+      
+      setTagSummaries(chartData.map((item, index) => ({
+        tagId: index + 1,
+        tagName: item.name,
+        tagIcon: item.icon || 'default',
+        amount: item.amount,
+        percentage: (item.amount / totalAmount) * 100,
+        color: chartColors[index % chartColors.length]
+      })));
+      setTotalAmount(chartData.reduce((sum, item) => sum + item.amount, 0));
+      setRecordCount(chartData.length);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setTagSummaries([]);
+      setTotalAmount(0);
+      setRecordCount(0);
+    } finally {
+      setIsLoading(false);
     }
-    
-    fetchTagSummaries();
+  };
+  
+  useEffect(() => {
+    fetchData();
   }, [userId, date, type]);
   
   // Initialize and update ECharts

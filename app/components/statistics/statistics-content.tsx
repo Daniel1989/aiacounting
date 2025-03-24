@@ -8,6 +8,7 @@ import { Overview } from './overview';
 import { PieChart } from './pie-chart';
 import { styled } from 'styled-components';
 import SummarySection from './summary-section';
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 type TabType = 'overview' | 'cost' | 'income';
 
@@ -67,6 +68,57 @@ const Header = styled.header`
   background: white;
   font-weight: bold;
   border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const MonthSelector = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+`;
+
+const MonthButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: #666;
+  
+  &:hover {
+    color: #53a867;
+  }
+  
+  &:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+const MonthDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const MonthText = styled.span`
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
 `;
 
 const ContentWrapper = styled.div`
@@ -75,10 +127,65 @@ const ContentWrapper = styled.div`
   background: #f5f5f5;
 `;
 
+const CalendarPopup = styled.div<{ isOpen: boolean }>`
+  display: ${props => props.isOpen ? 'block' : 'none'};
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  padding: 16px;
+  width: 300px;
+`;
+
+const MonthGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+`;
+
+const MonthItem = styled.button<{ isSelected: boolean, isDisabled: boolean }>`
+  padding: 8px;
+  text-align: center;
+  background: ${props => props.isSelected ? '#53a867' : 'white'};
+  color: ${props => props.isSelected ? 'white' : props.isDisabled ? '#ccc' : '#333'};
+  border: 1px solid ${props => props.isSelected ? '#53a867' : '#eee'};
+  border-radius: 4px;
+  cursor: ${props => props.isDisabled ? 'not-allowed' : 'pointer'};
+  
+  &:hover {
+    background: ${props => props.isDisabled ? 'white' : props.isSelected ? '#53a867' : '#f5f5f5'};
+  }
+`;
+
+const YearSelector = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+`;
+
+const YearButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+`;
+
+const YearText = styled.span`
+  font-weight: bold;
+  font-size: 16px;
+`;
+
 export default function StatisticsContent({ userId, locale }: StatisticsContentProps) {
   const t = useTranslations('statistics');
   const [selected, setSelected] = useState<TabType>('overview');
-  const [current] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarYear, setCalendarYear] = useState(dayjs().year());
   
   const tabs = [
     { icon: 'overview', name: t('overview') },
@@ -86,10 +193,100 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
     { icon: 'income', name: t('income') }
   ];
   
+  const goToPreviousMonth = () => {
+    setSelectedDate(prev => prev.subtract(1, 'month'));
+  };
+  
+  const goToNextMonth = () => {
+    // Don't allow selecting future months
+    setSelectedDate(prev => prev.add(1, 'month'));
+  };
+  
+  const handleMonthSelect = (month: number) => {
+    const newDate = dayjs().year(calendarYear).month(month);
+    
+    // Don't allow selecting future months
+    if (newDate.isAfter(dayjs(), 'month')) return;
+    
+    setSelectedDate(newDate);
+    setCalendarOpen(false);
+  };
+  
+  const goToPreviousYear = () => {
+    setCalendarYear(prev => prev - 1);
+  };
+  
+  const goToNextYear = () => {
+    if (calendarYear < dayjs().year()) {
+      setCalendarYear(prev => prev + 1);
+    }
+  };
+  
+  const isCurrentMonth = selectedDate.format('YYYY-MM') === dayjs().format('YYYY-MM');
+  const formattedMonth = selectedDate.format('YYYY-MM');
+  
+  const months = locale === 'zh' 
+    ? ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  
   return (
     <div className="flex flex-col h-full">
-      <Header>{dayjs(current).format('YYYY年MM月')}</Header>
-      <SummarySection userId={userId} locale={locale} />
+      <Header>
+        <MonthSelector>
+          <MonthButton onClick={goToPreviousMonth}>
+            <ChevronLeft size={20} />
+          </MonthButton>
+          
+          <div style={{ position: 'relative' }}>
+            <MonthDisplay onClick={() => setCalendarOpen(!calendarOpen)}>
+              <MonthText>
+                {locale === 'zh' 
+                  ? `${selectedDate.year()}年${selectedDate.month() + 1}月` 
+                  : selectedDate.format('MMMM YYYY')}
+              </MonthText>
+              <Calendar size={16} />
+            </MonthDisplay>
+            
+            {/* <CalendarPopup isOpen={calendarOpen}>
+              <YearSelector>
+                <YearButton onClick={goToPreviousYear}>
+                  <ChevronLeft size={16} />
+                </YearButton>
+                <YearText>{calendarYear}</YearText>
+                <YearButton 
+                  onClick={goToNextYear}
+                  disabled={calendarYear >= dayjs().year()}
+                >
+                  <ChevronRight size={16} />
+                </YearButton>
+              </YearSelector>
+              
+              <MonthGrid>
+                {months.map((month, index) => (
+                  <MonthItem 
+                    key={month}
+                    isSelected={selectedDate.month() === index && selectedDate.year() === calendarYear}
+                    isDisabled={calendarYear === dayjs().year() && index > dayjs().month()}
+                    onClick={() => handleMonthSelect(index)}
+                    disabled={calendarYear === dayjs().year() && index > dayjs().month()}
+                  >
+                    {locale === 'zh' ? `${index + 1}月` : month.slice(0, 3)}
+                  </MonthItem>
+                ))}
+              </MonthGrid>
+            </CalendarPopup> */}
+          </div>
+          
+          <MonthButton onClick={goToNextMonth} disabled={isCurrentMonth}>
+            <ChevronRight size={20} />
+          </MonthButton>
+        </MonthSelector>
+      </Header>
+      <SummarySection 
+        userId={userId} 
+        locale={locale} 
+        month={formattedMonth}
+      />
       <TabHeader>
         {tabs.map((tab) => (
           <li 
@@ -105,9 +302,29 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
         ))}
       </TabHeader>
       <ContentWrapper>
-        {selected === 'overview' && <Overview userId={userId} locale={locale} date={current} />}
-        {selected === 'cost' && <PieChart userId={userId} locale={locale} type="cost" date={current} />}
-        {selected === 'income' && <PieChart userId={userId} locale={locale} type="income" date={current} />}
+        {selected === 'overview' && (
+          <Overview 
+            userId={userId} 
+            locale={locale} 
+            date={selectedDate.toDate()} 
+          />
+        )}
+        {selected === 'cost' && (
+          <PieChart 
+            userId={userId} 
+            locale={locale} 
+            type="cost" 
+            date={selectedDate.toDate()} 
+          />
+        )}
+        {selected === 'income' && (
+          <PieChart 
+            userId={userId} 
+            locale={locale} 
+            type="income" 
+            date={selectedDate.toDate()} 
+          />
+        )}
       </ContentWrapper>
     </div>
   );

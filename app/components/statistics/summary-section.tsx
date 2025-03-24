@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl';
 import { styled } from 'styled-components';
 import { createClient } from '@/app/lib/supabase/client';
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import dayjs from 'dayjs';
 
 interface SummarySectionProps {
   userId: string;
   locale: string;
+  month?: string;
 }
 
 interface SummaryData {
@@ -197,7 +199,7 @@ const NotEnoughData = styled.div`
   }
 `;
 
-export default function SummarySection({ userId, locale }: SummarySectionProps) {
+export default function SummarySection({ userId, locale, month }: SummarySectionProps) {
   const t = useTranslations('statistics');
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -214,11 +216,7 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
         setIsLoading(true);
         const supabase = createClient();
         
-        // Get last 90 days of records with tag information
-        const ninetyDaysAgo = new Date();
-        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-        
-        const { data: records, error } = await supabase
+        let query = supabase
           .from('records')
           .select(`
             *,
@@ -230,9 +228,26 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
             )
           `)
           .eq('user_id', userId)
-          .gte('updated_at', ninetyDaysAgo.toISOString())
           .order('updated_at', { ascending: false });
+        
+        // Filter by month if provided, otherwise use last 90 days
+        if (month) {
+          const startDate = dayjs(month).startOf('month').toISOString();
+          const endDate = dayjs(month).endOf('month').toISOString();
           
+          query = query
+            .gte('updated_at', startDate)
+            .lte('updated_at', endDate);
+        } else {
+          // Get last 90 days of records with tag information
+          const ninetyDaysAgo = new Date();
+          ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+          
+          query = query.gte('updated_at', ninetyDaysAgo.toISOString());
+        }
+        
+        const { data: records, error } = await query;
+        
         if (error) {
           console.error('Error fetching records:', error);
           setIsLoading(false);
@@ -313,7 +328,7 @@ export default function SummarySection({ userId, locale }: SummarySectionProps) 
     };
     
     fetchSummaryData();
-  }, [userId, locale, t]);
+  }, [userId, locale, t, month]);
   
   const fetchAiTips = async (userId: string, locale: string) => {
     try {
