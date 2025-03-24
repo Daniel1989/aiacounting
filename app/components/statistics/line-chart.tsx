@@ -100,98 +100,76 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
   };
   
   useEffect(() => {
-    fetchRecords();
-  }, [currentDate, userId]);
-  
-  const fetchRecords = async () => {
-    try {
-      setIsLoading(true);
-      
-      const supabase = createClient();
-      
-      // Get the first and last day of the selected month
-      const startOfMonth = dayjs(date).startOf('month');
-      const endOfMonth = dayjs(date).endOf('month');
-      
-      // Get all days in the month as string dates (YYYY-MM-DD)
-      const daysInMonth = [];
-      let currentDay = startOfMonth.clone();
-      
-      while (currentDay.isBefore(endOfMonth) || currentDay.isSame(endOfMonth, 'day')) {
-        daysInMonth.push(currentDay.format('YYYY-MM-DD'));
-        currentDay = currentDay.add(1, 'day');
-      }
-      
-      // Initialize records for each day in the month
-      const records = daysInMonth.map(day => ({
-        date: day,
-        income: 0,
-        expense: 0
-      }));
-      
-      // Query for records in the selected month
-      const { data, error } = await supabase
-        .from('records')
-        .select('*')
-        .eq('user_id', userId)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', endOfMonth.toISOString());
-      
-      if (error) {
-        console.error('Error fetching records:', error);
-        return;
-      }
-      
-      // Aggregate records by day
-      if (data && data.length > 0) {
-        data.forEach(record => {
-          const recordDate = dayjs(record.created_at).format('YYYY-MM-DD');
-          const dayRecord = records.find(r => r.date === recordDate);
-          
-          if (dayRecord) {
-            if (record.category === 'income') {
-              dayRecord.income += record.amount;
-            } else if (record.category === 'cost') {
-              dayRecord.expense += record.amount;
-            }
-          }
-        });
+    async function fetchRecords() {
+      try {
+        setIsLoading(true);
         
-        setRecords(records);
-      } else {
+        const supabase = createClient();
+        
+        // Get the first and last day of the selected month
+        const startOfMonth = dayjs(date).startOf('month');
+        const endOfMonth = dayjs(date).endOf('month');
+        
+        // Get all days in the month as string dates (YYYY-MM-DD)
+        const daysInMonth = [];
+        let currentDay = startOfMonth.clone();
+        
+        while (currentDay.isBefore(endOfMonth) || currentDay.isSame(endOfMonth, 'day')) {
+          daysInMonth.push(currentDay.format('YYYY-MM-DD'));
+          currentDay = currentDay.add(1, 'day');
+        }
+        
+        // Initialize records for each day in the month
+        const records = daysInMonth.map(day => ({
+          date: day,
+          income: 0,
+          expense: 0
+        }));
+        
+        // Query for records in the selected month
+        const { data, error } = await supabase
+          .from('records')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('created_at', startOfMonth.toISOString())
+          .lte('created_at', endOfMonth.toISOString());
+        
+        if (error) {
+          console.error('Error fetching records:', error);
+          setRecords([]);
+          return;
+        }
+        
+        // Aggregate records by day
+        if (data && data.length > 0) {
+          data.forEach(record => {
+            const recordDate = dayjs(record.created_at).format('YYYY-MM-DD');
+            const dayRecord = records.find(r => r.date === recordDate);
+            
+            if (dayRecord) {
+              if (record.category === 'income') {
+                dayRecord.income += record.amount;
+              } else if (record.category === 'cost') {
+                dayRecord.expense += record.amount;
+              }
+            }
+          });
+          
+          setRecords(records);
+        } else {
+          setRecords([]);
+        }
+      } catch (error) {
+        console.error('Error in fetchRecords:', error);
         setRecords([]);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error in fetchRecords:', error);
-      setRecords([]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+    
+    fetchRecords();
+  }, [date, userId]);
   
-  // Get previous 7 days
-  const getPrevData = () => {
-    if (isLoading) return;
-    const newDate = dayjs(currentDate).subtract(count, 'day').toDate();
-    setCurrentDate(newDate);
-    setIndex(index - 1);
-  };
-  
-  // Get next 7 days
-  const getNextData = () => {
-    if (isLoading) return;
-    const newDate = dayjs(currentDate).add(count, 'day').toDate();
-    setCurrentDate(newDate);
-    setIndex(index + 1);
-  };
-  
-  // Get current 7 days
-  const getCurrentData = () => {
-    if (isLoading) return;
-    setCurrentDate(new Date(date));
-    setIndex(0);
-  };
-
   // Initialize and update ECharts
   useEffect(() => {
     // Initialize chart
@@ -207,14 +185,22 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
       } else {
         chartInstance.current.hideLoading();
       }
-      console.log(records);
+      
       // Set chart options
       if (records.length > 0) {
+        // Format the dates for display
+        const formattedDates = records.map(record => {
+          const day = dayjs(record.date).date();
+          return day;
+        });
+        
         const option = {
           tooltip: {
             trigger: 'axis',
             formatter: function(params: any) {
-              const date = params[0].name;
+              const recordIndex = params[0].dataIndex;
+              const record = records[recordIndex];
+              const date = dayjs(record.date).format(locale === 'zh' ? 'YYYY年MM月DD日' : 'MMM DD, YYYY');
               let result = `${date}<br/>`;
               
               params.forEach((param: any) => {
@@ -239,7 +225,7 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
           xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: records.map(record => record.date),
+            data: formattedDates,
             axisLine: {
               lineStyle: {
                 color: colors.grid
@@ -345,15 +331,7 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
         chartInstance.current.setOption(option);
       }
     }
-    
-    // Cleanup
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.dispose();
-        chartInstance.current = null;
-      }
-    };
-  }, [records, isLoading, t]);
+  }, [records, isLoading, t, locale]);
   
   // Handle window resize
   useEffect(() => {
@@ -373,6 +351,12 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
     return () => {
       window.removeEventListener('resize', handleResize);
       clearTimeout(timer);
+      
+      // Cleanup chart when component unmounts
+      if (chartInstance.current) {
+        chartInstance.current.dispose();
+        chartInstance.current = null;
+      }
     };
   }, []);
   
@@ -398,12 +382,6 @@ export function LineChart({ userId, date, locale }: LineChartProps) {
       </ChartLegend>
       
       <ChartWrapper ref={chartRef} style={{ minHeight: '300px' }} />
-      
-      <ButtonWrapper>
-        <button onClick={getPrevData}>{t('previousDays', { count })}</button>
-        <button onClick={getCurrentData}>{t('currentDay')}</button>
-        <button onClick={getNextData}>{t('nextDays', { count })}</button>
-      </ButtonWrapper>
     </Wrapper>
   );
 } 

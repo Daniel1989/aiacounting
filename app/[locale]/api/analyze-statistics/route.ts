@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     
     // Get request body
-    const { userId, locale } = await request.json();
+    const { userId, locale, month } = await request.json();
     const t = await getTranslations({ locale, namespace: 'statistics' });
 
     if (!userId) {
@@ -27,11 +27,8 @@ export async function POST(request: NextRequest) {
     // Initialize Supabase client
     const supabase = await createClient();
     
-    // Get last 90 days of records with tag information
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    
-    const { data: records, error } = await supabase
+    // Query to get records
+    let query = supabase
       .from('records')
       .select(`
         *,
@@ -43,8 +40,34 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('user_id', userId)
-      .gte('updated_at', ninetyDaysAgo.toISOString())
       .order('updated_at', { ascending: false });
+    
+    // Filter by month if provided, otherwise use last 90 days
+    let timeSpan = '90 days';
+    if (month) {
+      const startDate = new Date(month);
+      startDate.setDate(1); // First day of month
+      const endDate = new Date(month);
+      endDate.setMonth(endDate.getMonth() + 1);
+      endDate.setDate(0); // Last day of month
+      
+      query = query
+        .gte('updated_at', startDate.toISOString())
+        .lte('updated_at', endDate.toISOString());
+      
+      // Format for display in the AI prompt
+      const monthName = new Date(month).toLocaleString(locale, { month: 'long' });
+      const year = new Date(month).getFullYear();
+      timeSpan = `${monthName} ${year}`;
+    } else {
+      // Get last 90 days of records
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      
+      query = query.gte('updated_at', ninetyDaysAgo.toISOString());
+    }
+    
+    const { data: records, error } = await query;
       
     if (error) {
       console.error('Error fetching records:', error);
@@ -109,12 +132,12 @@ export async function POST(request: NextRequest) {
         }))
         .sort((a, b) => b.amount - a.amount),
       hasSavings: balance > 0,
-      timeSpan: '90 days'
+      timeSpan
     };
     
     // Generate AI analysis
     const prompt = `
-      You are a financial advisor analyzing the last 90 days of a user's financial records.
+      You are a financial advisor analyzing the user's financial records for ${financialData.timeSpan}.
       
       Here is their financial data:
       - Total Income: ${financialData.totalIncome.toFixed(2)}

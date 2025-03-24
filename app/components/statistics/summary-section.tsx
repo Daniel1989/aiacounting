@@ -317,8 +317,8 @@ export default function SummarySection({ userId, locale, month }: SummarySection
           isAiTips: false
         });
         
-        // Fetch AI tips
-        fetchAiTips(userId, locale);
+        // Fetch AI tips with the current month
+        fetchAiTips(userId, locale, month);
         
       } catch (error) {
         console.error('Error:', error);
@@ -330,7 +330,7 @@ export default function SummarySection({ userId, locale, month }: SummarySection
     fetchSummaryData();
   }, [userId, locale, t, month]);
   
-  const fetchAiTips = async (userId: string, locale: string) => {
+  const fetchAiTips = async (userId: string, locale: string, month?: string) => {
     try {
       setIsLoadingAiTips(true);
       
@@ -339,7 +339,11 @@ export default function SummarySection({ userId, locale, month }: SummarySection
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId, locale }),
+        body: JSON.stringify({ 
+          userId, 
+          locale,
+          month 
+        }),
       });
       
       if (!response.ok) {

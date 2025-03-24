@@ -200,6 +200,7 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
   const goToNextMonth = () => {
     // Don't allow selecting future months
     setSelectedDate(prev => prev.add(1, 'month'));
+
   };
   
   const handleMonthSelect = (month: number) => {
@@ -247,7 +248,7 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
               <Calendar size={16} />
             </MonthDisplay>
             
-            {/* <CalendarPopup isOpen={calendarOpen}>
+            <CalendarPopup isOpen={calendarOpen}>
               <YearSelector>
                 <YearButton onClick={goToPreviousYear}>
                   <ChevronLeft size={16} />
@@ -274,7 +275,7 @@ export default function StatisticsContent({ userId, locale }: StatisticsContentP
                   </MonthItem>
                 ))}
               </MonthGrid>
-            </CalendarPopup> */}
+            </CalendarPopup>
           </div>
           
           <MonthButton onClick={goToNextMonth} disabled={isCurrentMonth}>

@@ -42,8 +42,7 @@ export default async function SettingsPage({ params, searchParams }: any) {
   // Also check for the admin query parameter route for extra security
   const isAdmin = Boolean(
     user?.auth_id && 
-    user.auth_id === ADMIN_AUTH_ID && 
-    searchParams.admin === 'true'
+    user.auth_id === ADMIN_AUTH_ID
   );
 
   return (
@@ -91,12 +90,12 @@ export default async function SettingsPage({ params, searchParams }: any) {
       </section>
       
       {/* Legal Links Section */}
-      <section>
+      {/* <section>
         <h2 className="text-xl font-semibold mb-4">{t('legal')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
           <LegalLinks locale={locale} />
         </div>
-      </section>
+      </section> */}
     </div>
   );
 } 

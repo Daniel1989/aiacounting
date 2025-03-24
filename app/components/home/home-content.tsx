@@ -207,13 +207,13 @@ export function HomeContent({ userId }: HomeContentProps) {
       
       // If swipe up (negative deltaY) and the gesture is significant (> 50px)
       if (deltaY < -50 && visible) {
-        setFullScreen(true);
+        // setFullScreen(true);
       } else if (deltaY < -50 && fullScreen && hasMoreRecords && !isLoadingMore) {
         // Load more records if we're already in full screen and swiping up again
         fetchRecords(false);
       } else if (deltaY > 50 && fullScreen) {
         // Swipe down to exit full screen
-        setFullScreen(false);
+        // setFullScreen(false);
       }
       
       touchStartY.current = null;
