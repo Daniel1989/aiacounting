@@ -90,12 +90,15 @@ export default async function SettingsPage({ params, searchParams }: any) {
       </section>
       
       {/* Legal Links Section */}
-      {/* <section>
+      <section>
         <h2 className="text-xl font-semibold mb-4">{t('legal')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
           <LegalLinks locale={locale} />
         </div>
-      </section> */}
+      </section>
+      <div className='mt-2 flex justify-center text-[#999]'>
+        <a href="https://beian.miit.gov.cn">浙ICP备2024107194号</a>
+      </div>
     </div>
   );
 } 

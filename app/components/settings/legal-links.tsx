@@ -16,21 +16,21 @@ export function LegalLinks({ locale }: LegalLinksProps) {
     {
       id: 'terms',
       title: t('termsOfService'),
-      url: `https://cdn.aiacounting.com/${locale}/terms-of-service.html`,
+      url: `/terms`,
       description: t('termsDescription'),
     },
     {
       id: 'privacy',
       title: t('privacyPolicy'),
-      url: `https://cdn.aiacounting.com/${locale}/privacy-policy.html`,
+      url: `/privacy`,
       description: t('privacyDescription'),
     },
-    {
-      id: 'cookies',
-      title: t('cookiePolicy'),
-      url: `https://cdn.aiacounting.com/${locale}/cookie-policy.html`,
-      description: t('cookieDescription'),
-    },
+    // {
+    //   id: 'cookies',
+    //   title: t('cookiePolicy'),
+    //   url: `https://cdn.aiacounting.com/${locale}/cookie-policy.html`,
+    //   description: t('cookieDescription'),
+    // },
   ];
   
   return (

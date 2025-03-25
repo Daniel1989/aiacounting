@@ -53,14 +53,16 @@ export function Nav({ locale }: NavProps) {
     { href: `/${locale}/wishlist`, icon: Heart, label: t('wishlist') },
     { href: `/${locale}/settings`, icon: Settings, label: t('settings') }
   ];
+
+  if(pathname.includes('privacy') || pathname.includes("terms")) {
+    return null
+  }
   
   return (
     <NavContainer>
       <NavList>
         {navItems.map(({ href, icon: Icon, label }) => {
-          console.log(pathname, href);
           const isActive = pathname === href || (pathname.startsWith(href + '/') && href !== '/zh' && href !== '/en');
-        
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none' }}>
               <NavItem active={isActive}>

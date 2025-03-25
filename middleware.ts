@@ -3,7 +3,7 @@ import { locales } from './config';
 import { updateSession } from '@/app/lib/supabase/middleware'
 
 // Define public paths that don't require authentication
-const publicPaths = ['/login', '/auth/callback'];
+const publicPaths = ['/login', '/auth/callback', '/terms', '/privacy'];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;

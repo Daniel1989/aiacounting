@@ -38,7 +38,9 @@ export default async function LoginPage({
           <LoginForm redirectTo={redirectTo} />
           
           <div className="mt-6 text-center text-sm text-gray-500">
-            {t('termsAgreement')}
+            { locale === 'zh' ? (
+              <span>登录即表示您同意我们的<a href='/terms' className='text-blue-600 hover:text-blue-800'>《服务条款》</a>和<a href='/privacy' className='text-blue-600 hover:text-blue-800'>《隐私政策》</a></span>
+            ) : t('termsAgreement')}
           </div>
         </div>
       </div>
