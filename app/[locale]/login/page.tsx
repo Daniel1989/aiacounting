@@ -2,6 +2,7 @@ import { LoginForm } from '@/app/components/auth/login-form';
 import { ResponsiveHome } from '@/app/components/responsive-home';
 import { LanguageSwitcher } from '@/app/components/language-switcher';
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 
 interface LoginPageProps {
   params: Promise<{ locale: string }>;
@@ -39,7 +40,7 @@ export default async function LoginPage({
           
           <div className="mt-6 text-center text-sm text-gray-500">
             { locale === 'zh' ? (
-              <span>登录即表示您同意我们的<a href='/terms' className='text-blue-600 hover:text-blue-800'>《服务条款》</a>和<a href='/privacy' className='text-blue-600 hover:text-blue-800'>《隐私政策》</a></span>
+              <span>登录即表示您同意我们的<Link href='/terms' className='text-blue-600 hover:text-blue-800'>《服务条款》</Link>和<Link href='/privacy' className='text-blue-600 hover:text-blue-800'>《隐私政策》</Link></span>
             ) : t('termsAgreement')}
           </div>
         </div>
