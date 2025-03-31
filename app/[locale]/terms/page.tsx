@@ -1,18 +1,20 @@
 import { Metadata } from "next"
+import { BackButton } from "@/components/back-button"
 
 export const metadata: Metadata = {
-  title: "用户协议 | 智账本",
-  description: "智账本用户协议",
+  title: "用户协议 | 抠搜记账",
+  description: "抠搜记账用户协议",
 }
 
 export default function TermsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">用户协议</h1>
+    <div className="container mx-auto px-4 py-8 max-w-4xl relative">
+      <BackButton />
+      <h1 className="text-3xl font-bold mb-8 mt-8">用户协议</h1>
       
       <div className="prose prose-gray max-w-none">
         <p className="mb-6">
-          欢迎您（即「用户」）使用我们提供的产品服务，开发商 Xiaopeng Cao（以下简称"我们"）合法拥有开发/运营标注名称为智账本的客户端应用程序、官方网站以及供第三方网站和应用程序使用的软件开发工具包（SDK）和应用程序编程接口（API）。
+          欢迎您（即「用户」）使用我们提供的产品服务，开发商 Xiaopeng Cao（以下简称"我们"）合法拥有开发/运营标注名称为抠搜记账的客户端应用程序、官方网站以及供第三方网站和应用程序使用的软件开发工具包（SDK）和应用程序编程接口（API）。
         </p>
 
         <p className="mb-6">
@@ -20,7 +22,7 @@ export default function TermsPage() {
         </p>
 
         <p className="mb-6">
-          当您点击"同意"，或者您使用我们的产品，或者以其他任何明示或者默示方式表示接受本协议的，即视为你已经完全同意本协议各项内容，（包括但不限于《"智账本"隐私政策》）的约束。本协议即在您与我们之间产生法律效力，成为对双方均具有约束力的法律文件。 如果你对本协议的任何条款表示异议，您可以选择终止登录（或停止使用服务）。
+          当您点击"同意"，或者您使用我们的产品，或者以其他任何明示或者默示方式表示接受本协议的，即视为你已经完全同意本协议各项内容，（包括但不限于《"抠搜记账"隐私政策》）的约束。本协议即在您与我们之间产生法律效力，成为对双方均具有约束力的法律文件。 如果你对本协议的任何条款表示异议，您可以选择终止登录（或停止使用服务）。
         </p>
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">目录</h2>
@@ -52,7 +54,7 @@ export default function TermsPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">2. 产品与服务</h2>
           <div className="space-y-4">
-            <p>2.1 产品智账本是指由我们开发、运营方合法拥有并运营的、标注名称为智账本的移动客户端应用程序以及其对应移动网站。客户端应用程序以软件形式提供，包括但不限于iOS等多个版本，您须选择与所安装终端设备相匹配的软件版本。</p>
+            <p>2.1 产品抠搜记账是指由我们开发、运营方合法拥有并运营的、标注名称为抠搜记账的移动客户端应用程序以及其对应移动网站。客户端应用程序以软件形式提供，包括但不限于iOS等多个版本，您须选择与所安装终端设备相匹配的软件版本。</p>
             <p>2.2 服务指我们向您提供的各项在线运营服务，包括但不限于我们的本身及我们提供的与我们的产品社区服务。</p>
             <p>2.3 我们将按照本协议以及我们发布的服务条款和操作规则提供基于互联网以及移动互联网的相关服务，我们有权根据本软件的实际运营情况调整网络服务的具体内容。</p>
             <p>2.4 用户理解并接受，我们仅提供相关的网络服务，除此之外与相关网络服务有关的设备（如个人电脑、手机、及其他与接入互联网或移动互联网有关的装置）及所需的费用（如为接入互联网而支付的电话费及上网费、为使用移动网而支付的手机费）均应由用户自行负担。</p>

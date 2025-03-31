@@ -1,14 +1,16 @@
 import { Metadata } from "next"
+import { BackButton } from "@/components/back-button"
 
 export const metadata: Metadata = {
-  title: "隐私政策 | 智账本",
-  description: "智账本隐私政策",
+  title: "隐私政策 | 抠搜记账",
+  description: "抠搜记账隐私政策",
 }
 
 export default function PrivacyPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">隐私政策</h1>
+    <div className="container mx-auto px-4 py-8 max-w-4xl relative">
+      <BackButton />
+      <h1 className="text-3xl font-bold mb-8 mt-8">隐私政策</h1>
       
       <div className="prose prose-gray max-w-none">
         <p className="mb-6">

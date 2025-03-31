@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/app/lib/supabase/client';
 import { ChevronDown, ChevronUp, Maximize2, RefreshCw } from 'lucide-react';
 import Decimal from 'decimal.js';
@@ -27,6 +27,8 @@ export function HomeContent({ userId }: HomeContentProps) {
   const t = useTranslations('home');
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isFromHongmeng = searchParams.get('from') === 'hongmeng';
   const locale = pathname.split('/')[1] || 'en';
   const [visible, setVisible] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
@@ -261,103 +263,103 @@ export function HomeContent({ userId }: HomeContentProps) {
   
   return (
     <>
-      {/* Content is conditionally displayed based on fullScreen state */}
-      <div className={fullScreen ? 'hidden' : 'block'}>
-        {/* Today's totals - styled like the legacy Total component */}
-        <div className="text-emerald-500 flex flex-col items-center justify-center text-sm my-24">
-          <span>{t('todayExpenses')}</span>
-          <span className="text-3xl font-bold my-1">￥{todayTotalCost}</span>
-          <span className="text-gray-400">{t('income')} ￥{todayTotalIncome}</span>
-        </div>
-        
-        {/* Add record button - styled like the legacy RecordButton component */}
-        <div className="flex justify-center items-center my-5">
-          <Link 
-            href={`/${locale}/records/new`}
-            className="text-sm px-8 py-2 bg-emerald-200 border-2 border-emerald-300 rounded-lg text-gray-800"
-          >
-            {t('addRecord')}
-          </Link>
-        </div>
+        {/* Content is conditionally displayed based on fullScreen state */}
+        <div className={fullScreen ? 'hidden' : 'block'}>
+          {/* Today's totals - styled like the legacy Total component */}
+          <div className="text-emerald-500 flex flex-col items-center justify-center text-sm my-24">
+            <span>{t('todayExpenses')}</span>
+            <span className="text-3xl font-bold my-1">￥{todayTotalCost}</span>
+            <span className="text-gray-400">{t('income')} ￥{todayTotalIncome}</span>
+          </div>
+          
+          {/* Add record button - styled like the legacy RecordButton component */}
+          <div className="flex justify-center items-center my-5">
+            <Link 
+              href={`/${locale}/records/new`}
+              className="text-sm px-8 py-2 bg-emerald-200 border-2 border-emerald-300 rounded-lg text-gray-800"
+            >
+              {t('addRecord')}
+            </Link>
+          </div>
         
         {/* Image Upload Component */}
-        {userId && <ImageUpload userId={userId} />}
-      </div>
-      
-      {/* Records section - can expand to full screen on swipe up */}
-      <div 
-        ref={recordsContainerRef}
-        className={`transition-all duration-300 ${
-          fullScreen 
-            ? 'fixed inset-0 bg-white z-50 overflow-y-auto pb-32' 
-            : ''
-        }`}
-      >
-        {fullScreen && (
-          <div className="sticky top-0 bg-white py-3 px-4 border-b flex justify-between items-center z-10">
-            <h2 className="text-xl font-semibold">{t('recentRecords')}</h2>
-            <button 
-              onClick={() => setFullScreen(false)}
-              className="p-2 text-gray-500 hover:text-gray-700"
-            >
-              <ChevronDown className="w-5 h-5" />
-            </button>
-          </div>
-        )}
+        { userId && !isFromHongmeng && <ImageUpload userId={userId} />}
+        </div>
         
-        {/* Toggle recent records - styled like the legacy ShowRecordButton component */}
-        {!fullScreen && (
-          <button 
-            onClick={() => setVisible(!visible)}
-            className="text-center text-gray-400 my-5 w-full"
-          >
-            {t('showRecentRecords')}
-            {visible ? 
-              <ChevronUp className="inline-block ml-1 w-5 h-5 transform transition-transform" /> : 
-              <ChevronDown className="inline-block ml-1 w-5 h-5 transform transition-transform" />
-            }
-          </button>
-        )}
-        
-        {/* Recent records */}
-        {(visible || fullScreen) && (
-          <div className={`${fullScreen ? '' : 'relative'} pt-4`}>
-            <RecentRecords records={recordList} />
-            
-            {/* Loading more indicator or end of records message */}
-            {fullScreen && (
-              <div 
-                ref={loadingMoreRef} 
-                className="text-center py-8"
+        {/* Records section - can expand to full screen on swipe up */}
+        <div 
+          ref={recordsContainerRef}
+          className={`transition-all duration-300 ${
+            fullScreen 
+              ? 'fixed inset-0 bg-white z-50 overflow-y-auto pb-32' 
+              : ''
+          }`}
+        >
+          {fullScreen && (
+            <div className="sticky top-0 bg-white py-3 px-4 border-b flex justify-between items-center z-10">
+              <h2 className="text-xl font-semibold">{t('recentRecords')}</h2>
+              <button 
+                onClick={() => setFullScreen(false)}
+                className="p-2 text-gray-500 hover:text-gray-700"
               >
-                {isLoadingMore ? (
-                  <div className="flex items-center justify-center">
-                    <RefreshCw className="w-4 h-4 animate-spin mr-2 text-gray-500" />
-                    <span className="text-sm text-gray-500">{t('loadingMore')}</span>
-                  </div>
-                ) : !hasMoreRecords && recordList.length > 0 ? (
-                  <div className="text-sm text-gray-500">{t('noMoreRecords')}</div>
-                ) : recordList.length === 0 ? (
-                  <div className="text-sm text-gray-500">{t('noRecords')}</div>
-                ) : null}
-              </div>
-            )}
-            
-            {/* Expand to full screen button - only shown when records are visible but not in full screen */}
-            {visible && !fullScreen && (
-              <div className="text-center mt-2 mb-6">
-                <button 
-                  onClick={() => setFullScreen(true)}
-                  className="text-sm text-gray-500 flex items-center justify-center mx-auto"
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+          
+          {/* Toggle recent records - styled like the legacy ShowRecordButton component */}
+          {!fullScreen && (
+            <button 
+              onClick={() => setVisible(!visible)}
+              className="text-center text-gray-400 my-5 w-full"
+            >
+              {t('showRecentRecords')}
+              {visible ? 
+                <ChevronUp className="inline-block ml-1 w-5 h-5 transform transition-transform" /> : 
+                <ChevronDown className="inline-block ml-1 w-5 h-5 transform transition-transform" />
+              }
+            </button>
+          )}
+          
+          {/* Recent records */}
+          {(visible || fullScreen) && (
+            <div className={`${fullScreen ? '' : 'relative'} pt-4`}>
+              <RecentRecords records={recordList} />
+              
+              {/* Loading more indicator or end of records message */}
+              {fullScreen && (
+                <div 
+                  ref={loadingMoreRef} 
+                  className="text-center py-8"
                 >
-                  <Maximize2 className="w-4 h-4 mr-1" />
-                  {t('expandRecords')}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                  {isLoadingMore ? (
+                    <div className="flex items-center justify-center">
+                      <RefreshCw className="w-4 h-4 animate-spin mr-2 text-gray-500" />
+                      <span className="text-sm text-gray-500">{t('loadingMore')}</span>
+                    </div>
+                  ) : !hasMoreRecords && recordList.length > 0 ? (
+                    <div className="text-sm text-gray-500">{t('noMoreRecords')}</div>
+                  ) : recordList.length === 0 ? (
+                    <div className="text-sm text-gray-500">{t('noRecords')}</div>
+                  ) : null}
+                </div>
+              )}
+              
+              {/* Expand to full screen button - only shown when records are visible but not in full screen */}
+              {visible && !fullScreen && (
+                <div className="text-center mt-2 mb-6">
+                  <button 
+                    onClick={() => setFullScreen(true)}
+                    className="text-sm text-gray-500 flex items-center justify-center mx-auto"
+                  >
+                    <Maximize2 className="w-4 h-4 mr-1" />
+                    {t('expandRecords')}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
     </>
   );
 } 
