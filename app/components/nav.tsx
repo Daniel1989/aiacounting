@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Home, PiggyBank, BarChart, Settings, Heart } from 'lucide-react';
@@ -44,7 +44,11 @@ const NavItem = styled.li<{ active: boolean }>`
 
 export function Nav({ locale }: NavProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useTranslations('nav');
+  
+  // Convert search params to object for Link component
+  const queryParams = Object.fromEntries(searchParams);
   
   const navItems = [
     { href: `/${locale}`, icon: Home, label: t('today') },
@@ -64,7 +68,14 @@ export function Nav({ locale }: NavProps) {
         {navItems.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || (pathname.startsWith(href + '/') && href !== '/zh' && href !== '/en');
           return (
-            <Link key={href} href={href} style={{ textDecoration: 'none' }}>
+            <Link 
+              key={href} 
+              href={{
+                pathname: href,
+                query: queryParams
+              }} 
+              style={{ textDecoration: 'none' }}
+            >
               <NavItem active={isActive}>
                 <Icon size={24} />
                 <span>{label}</span>

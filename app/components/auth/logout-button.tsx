@@ -28,9 +28,6 @@ export function LogoutButton({
       
       // Refresh the page to update the UI
       router.refresh();
-      
-      // Redirect to home page
-      router.push('/');
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {

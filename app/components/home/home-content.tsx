@@ -283,7 +283,7 @@ export function HomeContent({ userId }: HomeContentProps) {
           </div>
         
         {/* Image Upload Component */}
-        { userId && !isFromHongmeng && <ImageUpload userId={userId} />}
+        { userId && <ImageUpload userId={userId} /> }
         </div>
         
         {/* Records section - can expand to full screen on swipe up */}

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 interface LegalLinksProps {
   locale: string;
@@ -10,6 +11,7 @@ interface LegalLinksProps {
 
 export function LegalLinks({ locale }: LegalLinksProps) {
   const t = useTranslations('settings');
+  const searchParams = useSearchParams();
   
   // Define the CDN links for legal documents
   const legalLinks = [
@@ -33,6 +35,10 @@ export function LegalLinks({ locale }: LegalLinksProps) {
     // },
   ];
   
+  // Create an object from URLSearchParams for passing to Link
+  console.log('searchParams', searchParams);
+  const queryParams = Object.fromEntries(searchParams);
+  
   return (
     <div className="space-y-4">
       <p className="text-gray-600 mb-4">{t('legalDescription')}</p>
@@ -41,7 +47,10 @@ export function LegalLinks({ locale }: LegalLinksProps) {
         {legalLinks.map((link) => (
           <li key={link.id} className="border-b border-gray-100 pb-3 last:border-0">
             <Link 
-              href={link.url}
+              href={{
+                pathname: link.url,
+                query: queryParams
+              }}
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-start hover:text-emerald-600 transition-colors"

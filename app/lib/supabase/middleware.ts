@@ -44,10 +44,14 @@ export async function updateSession(request: NextRequest) {
     !user &&
     !isPublicPath
   ) {
-    // no user, potentially respond by redirecting the user to the login page
+    // no user, redirect to the login page while preserving all search parameters
     const url = new URL(`/${locale}/login`, request.url);
-    url.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(url)
+    // Copy all existing search parameters from the original request
+    request.nextUrl.searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+    
+    return NextResponse.redirect(url);
   }
   
   return supabaseResponse

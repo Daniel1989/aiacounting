@@ -7,11 +7,7 @@ import { useTranslations } from 'next-intl';
 
 type AuthMode = 'login' | 'register';
 
-interface LoginFormProps {
-  redirectTo?: string;
-}
-
-export function LoginForm({ redirectTo }: any) {
+export function LoginForm() {
   const t = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,13 +56,25 @@ export function LoginForm({ redirectTo }: any) {
         setTimeout(() => {
           // Refresh to ensure the session is properly loaded
           console.log('Refreshing...');
-          // Redirect to the specified URL or home page
-          // if (redirectTo) {
-          //   router.push(redirectTo);
-          // } else {
-          //   router.push(`/${locale}`);
-          // }
-          window.location.href = `/${locale}`
+          
+          // Get the current URL search parameters to preserve them
+          const searchParams = new URLSearchParams(window.location.search);
+          // Build the redirect URL with all search parameters
+          let redirectPath = `/${locale}`;
+          
+          // Preserve all other search parameters except 'from' (since we've used it)
+          const newSearchParams = new URLSearchParams();
+          searchParams.forEach((value, key) => {
+              newSearchParams.append(key, value);
+          });
+          
+          // Add search parameters to the redirect URL if there are any
+          const queryString = newSearchParams.toString();
+          if (queryString) {
+            redirectPath += `?${queryString}`;
+          }
+          
+          window.location.href = redirectPath;
         }, 3000);
       } else {
         // For registration, use the non-localized callback route

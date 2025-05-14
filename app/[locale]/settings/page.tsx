@@ -58,12 +58,12 @@ export default async function SettingsPage({ params, searchParams }: any) {
       </section>
       
       {/* Invite Code Section */}
-      <section className="mb-8">
+      {/* <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">{t('inviteCode')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
           <InviteCodeSettings userId={userId} hasUsedInviteCode={hasUsedInviteCode} />
         </div>
-      </section>
+      </section> */}
       
       {/* Admin Invite Code Generation - Only visible to admin */}
       {isAdmin && (

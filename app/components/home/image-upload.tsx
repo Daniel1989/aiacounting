@@ -128,8 +128,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       
       // Refresh the page after a delay to show updated records
       setTimeout(() => {
-        router.refresh();
-      }, 1000);
+        window.location.reload();
+      }, 100);
     } catch (err) {
       console.error('Error saving records:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');

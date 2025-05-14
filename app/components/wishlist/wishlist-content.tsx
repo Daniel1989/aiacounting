@@ -554,7 +554,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
           </GoalCard>
         </GoalCardWrapper>
         
-        <GoalCardWrapper>
+        {/* <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('shopping')}>
             <div className="icon-container shopping">
               <ShoppingBag size={24} />
@@ -588,7 +588,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="lock-text">{t('premiumFeature')}</div>
             </LockedOverlay>
           )}
-        </GoalCardWrapper>
+        </GoalCardWrapper> */}
       </GoalList>
     </Container>
   );
