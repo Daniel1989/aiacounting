@@ -5,7 +5,7 @@ import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
 import { locales } from '../../config';
 import { Nav } from '@/app/components/nav';
 import { Toaster } from 'sonner';
-
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: "AI Accounting",
@@ -50,7 +50,9 @@ export default async function RootLayout({
             <main className="flex-grow pb-16">
               {children}
             </main>
-            <Nav locale={locale} />
+            <Suspense>
+              <Nav locale={locale} />
+            </Suspense>
           </div>
           <Toaster position="top-center" richColors />
         </NextIntlClientProvider>

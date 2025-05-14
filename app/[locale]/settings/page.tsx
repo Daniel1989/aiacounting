@@ -6,7 +6,7 @@ import { AdminInviteCodes } from '@/app/components/settings/admin-invite-codes';
 import { LegalLinks } from '@/app/components/settings/legal-links';
 import { LogoutButton } from '@/app/components/auth/logout-button';
 import { hasUserUsedInviteCode } from '@/app/lib/supabase/invite-codes';
-
+import { Suspense } from 'react';
 // Admin user auth ID - this would typically be stored in environment variables
 const ADMIN_AUTH_ID = process.env.ADMIN_AUTH_ID || '';
 
@@ -93,7 +93,9 @@ export default async function SettingsPage({ params, searchParams }: any) {
       <section>
         <h2 className="text-xl font-semibold mb-4">{t('legal')}</h2>
         <div className="bg-white rounded-lg shadow p-6">
-          <LegalLinks locale={locale} />
+          <Suspense>
+            <LegalLinks locale={locale} />
+          </Suspense>
         </div>
       </section>
       <div className='mt-2 flex justify-center text-[#999]'>
