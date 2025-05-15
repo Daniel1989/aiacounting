@@ -52,7 +52,9 @@ export function LoginForm() {
         setMessage(t('success.loginSuccess'));
         setLoginSuccess(true);
         console.log('Login successful');
-        (window as any).bitJsBridge.login(window.location.href);
+        if((window as any).bitJsBridge) {
+          (window as any).bitJsBridge.login(window.location.href);
+        }
         // Wait a moment to let the session be established
         setTimeout(() => {
           // Refresh to ensure the session is properly loaded
