@@ -6,6 +6,7 @@ import { locales } from '../../config';
 import { Nav } from '@/app/components/nav';
 import { Toaster } from 'sonner';
 import { Suspense } from 'react';
+import { AndroidWebViewProvider } from '@/app/components/android-webview-provider';
 
 export const metadata: Metadata = {
   title: "AI Accounting",
@@ -46,15 +47,17 @@ export default async function RootLayout({
         className={`antialiased bg-white text-gray-900`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-grow pb-16">
-              {children}
-            </main>
-            <Suspense>
-              <Nav locale={locale} />
-            </Suspense>
-          </div>
-          <Toaster position="top-center" richColors />
+          <AndroidWebViewProvider>
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-grow pb-16">
+                {children}
+              </main>
+              <Suspense>
+                <Nav locale={locale} />
+              </Suspense>
+            </div>
+            <Toaster position="top-center" richColors />
+          </AndroidWebViewProvider>
         </NextIntlClientProvider>
       </body>
     </html>
