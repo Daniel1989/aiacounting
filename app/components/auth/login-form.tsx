@@ -52,6 +52,7 @@ export function LoginForm() {
         setMessage(t('success.loginSuccess'));
         setLoginSuccess(true);
         console.log('Login successful');
+        (window as any).bitJsBridge.login(window.location.href);
         // Wait a moment to let the session be established
         setTimeout(() => {
           // Refresh to ensure the session is properly loaded
@@ -75,7 +76,7 @@ export function LoginForm() {
           }
           
           window.location.href = redirectPath;
-        }, 3000);
+        }, 1000);
       } else {
         // For registration, use the non-localized callback route
         // This is because the email link will not have the locale information

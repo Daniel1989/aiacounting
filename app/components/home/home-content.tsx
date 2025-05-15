@@ -9,7 +9,7 @@ import { ChevronDown, ChevronUp, Maximize2, RefreshCw } from 'lucide-react';
 import Decimal from 'decimal.js';
 import { RecentRecords } from './recent-records';
 import { ImageUpload } from './image-upload';
-import { AndroidWebViewDemo } from './android-webview-demo';
+// import { AndroidWebViewDemo } from './android-webview-demo';
 
 interface HomeContentProps {
   userId: string | null;
@@ -266,9 +266,6 @@ export function HomeContent({ userId }: HomeContentProps) {
     <>
         {/* Content is conditionally displayed based on fullScreen state */}
         <div className={fullScreen ? 'hidden' : 'block'}>
-          {/* Android WebView Demo - only shows when detected */}
-          <AndroidWebViewDemo />
-          
           {/* Today's totals - styled like the legacy Total component */}
           <div className="text-emerald-500 flex flex-col items-center justify-center text-sm my-24">
             <span>{t('todayExpenses')}</span>
