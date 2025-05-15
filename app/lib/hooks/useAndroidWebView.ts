@@ -55,8 +55,8 @@ export function useAndroidWebView(onMessage?: (message: AndroidMessage) => void)
                         const h5Port = event.ports[0]; // 1. 保存从应用侧发送过来的端口。
                         h5Port.onmessage = function (event: MessageEvent) {
                           // 2. 接收ets侧发送过来的消息。
-                          var msg = 'Got message from ets:';
-                          var result = event.data;
+                          let msg = 'Got message from ets:';
+                          const result = event.data;
                           if (typeof(result) === 'string') {
                             console.info(`received string message from html5, string is: ${result}`);
                             msg = msg + result;
@@ -70,7 +70,9 @@ export function useAndroidWebView(onMessage?: (message: AndroidMessage) => void)
                           } else {
                             console.info('not support');
                           }
-                          onMessage && onMessage(result);
+                          if(onMessage) {
+                            onMessage(result);
+                          }
                         }
                         setH5port(h5Port);
                     }
