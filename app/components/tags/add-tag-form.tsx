@@ -297,12 +297,13 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
   };
   
   // Handle selecting a tag
-  const handleSelectTag = (icon: string, tagId?: number) => {
+  const handleSelectTag = (icon: string, tagId: number, name: string) => {
     setSelectedIcon(icon);
     // If a tag ID is provided, store it for reference
     if (tagId) {
       setSelectedTagId(tagId);
     }
+    setTagName(name);
   };
   
   if (isLoading) {
@@ -360,7 +361,7 @@ export function AddTagForm({ userId, locale }: AddTagFormProps) {
                 {category.tags.map((tag, index) => (
                   <button 
                     key={`${tag.icon}-${tag.name}-${index}`}
-                    onClick={() => handleSelectTag(tag.icon, tag.id)}
+                    onClick={() => handleSelectTag(tag.icon, tag.id!, tag.name)}
                     className="flex flex-col items-center w-16 h-16"
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${

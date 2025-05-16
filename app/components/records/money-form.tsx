@@ -26,6 +26,7 @@ interface Tag {
   category: 'income' | 'cost';
   isUserTag?: boolean;
   originalTagId?: number;
+  tag_id?: number;
 }
 
 interface FormData {
@@ -76,8 +77,6 @@ export function MoneyForm({ userId }: MoneyFormProps) {
       setTags(prevTags => {
         const tagExists = prevTags.some(tag => tag.id === parseInt(newTagId));
         if (!tagExists) {
-          // Show success message
-          toast.success(t('tagAdded'));
           // Select the new tag
           setFormData(prev => ({
             ...prev,
@@ -212,7 +211,7 @@ export function MoneyForm({ userId }: MoneyFormProps) {
             user_id: userId,
             amount: formData.amount,
             category,
-            tag_id: formData.tagId,
+            tag_id:  selectedTag.isUserTag ? selectedTag.originalTagId : selectedTag.id,
             note: formData.note || '',
             is_user_tag: selectedTag.isUserTag || false
           }

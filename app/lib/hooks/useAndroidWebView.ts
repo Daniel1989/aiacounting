@@ -48,7 +48,6 @@ export function useAndroidWebView(onMessage?: (message: AndroidMessage) => void)
 
         // Handler for messages from Android
         const handleAndroidMessage = (event: MessageEvent) => {
-            console.log('handleAndroidMessage', event);
             try {
                 if (event.data === '__init_port__') {
                     if (event.ports[0] !== null) {

@@ -26,7 +26,6 @@ export function NumberPadSection({ value, onChange, onSave }: NumberPadSectionPr
     // Save record when "完成" (complete) is clicked
     if (text === CONSTANTS.complete) {
       await onSave();
-      onChange(0);
       setOutput('0');
       return;
     }

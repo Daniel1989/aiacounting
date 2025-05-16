@@ -11,6 +11,7 @@ interface Tag {
   name: string;
   icon: string;
   category: 'income' | 'cost';
+  tag_id?: number;
 }
 
 interface TagsSectionProps {
