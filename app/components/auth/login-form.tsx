@@ -188,7 +188,8 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors font-medium"
+          className="w-full bg-gray-400 text-white py-2 px-4 rounded-md transition-colors font-medium"
+          data-terms-agreement-button
         >
           {isLoading ? t('processing') : mode === 'login' ? t('login') : t('register')}
         </button>

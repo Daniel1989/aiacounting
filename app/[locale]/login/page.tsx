@@ -3,6 +3,7 @@ import { ResponsiveHome } from '@/app/components/responsive-home';
 import { LanguageSwitcher } from '@/app/components/language-switcher';
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { TermsAgreementCheckbox } from '@/app/components/auth/terms-agreement-checkbox';
 
 interface LoginPageProps {
   params: Promise<{ locale: string }>;
@@ -35,16 +36,8 @@ export default async function LoginPage({
         <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
           <LoginForm />
           
-          <div className="mt-6 text-center text-sm text-gray-500">
-            { locale === 'zh' ? (
-              <span>登录即表示您同意我们的<Link href={{ 
-                pathname: '/terms',
-                query: searchParams 
-              }} className='text-blue-600 hover:text-blue-800'>《服务条款》</Link>和<Link href={{
-                pathname: '/privacy',
-                query: searchParams
-              }} className='text-blue-600 hover:text-blue-800'>《隐私政策》</Link></span>
-            ) : t('termsAgreement')}
+          <div className="mt-6 text-center">
+            <TermsAgreementCheckbox locale={locale} searchParams={searchParams} />
           </div>
         </div>
       </div>
