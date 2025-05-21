@@ -354,16 +354,16 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
   
   const handleSelectGoal = (type: string) => {
     // For shopping and savings, check if user has activated an invite code
-    if ((type === 'shopping' || type === 'savings') && !hasActivatedInviteCode) {
-      // Don't navigate if premium feature is locked
-      return;
-    }
+    // if ((type === 'shopping' || type === 'savings') && !hasActivatedInviteCode) {
+    //   // Don't navigate if premium feature is locked
+    //   return;
+    // }
     
     // If user has an active goal, show it instead of creating a new one
     if (activeGoal) {
-      router.push(`/${locale}/wishlist`);
+      router.push(`/${locale}/wishlist2`);
     } else {
-      router.push(`/${locale}/wishlist/${type}`);
+      router.push(`/${locale}/wishlist2/${type}`);
     }
   };
   
@@ -523,7 +523,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
         </PlanStatusContainer>
         
         <ActionButtons>
-          <button className="secondary" onClick={() => router.push(`/${locale}/wishlist/${activeGoal.type}?edit=${activeGoal.id}`)}>
+          <button className="secondary" onClick={() => router.push(`/${locale}/wishlist2/${activeGoal.type}?edit=${activeGoal.id}`)}>
             {t('adjustPlan')}
           </button>
           <button className="primary" onClick={handleAbandonPlan}>
@@ -542,7 +542,18 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
       </Header>
       
       <GoalList>
-        <GoalCardWrapper>
+      <GoalCardWrapper>
+          <GoalCard onClick={() => handleSelectGoal('savings')}>
+            <div className="icon-container savings">
+              <PiggyBank size={24} />
+            </div>
+            <div className="content">
+              <div className="title">{t('saving.title')}</div>
+              <div className="description">{t('saving.description')}</div>
+            </div>
+          </GoalCard>
+        </GoalCardWrapper>
+        {/* <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('travel')}>
             <div className="icon-container travel">
               <Plane size={24} />
@@ -552,7 +563,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="description">{t('travel.description')}</div>
             </div>
           </GoalCard>
-        </GoalCardWrapper>
+        </GoalCardWrapper> */}
         
         {/* <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('shopping')}>

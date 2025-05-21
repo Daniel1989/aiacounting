@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     if (tagsError) {
       console.error('Error fetching tags:', tagsError);
       return NextResponse.json(
-        { error: 'Failed to fetch tags' },
+        { error: '系统繁忙，请稍后再试' },
         { status: 500 }
       );
     }

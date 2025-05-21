@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Error fetching records:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch records' },
+        { error: '系统繁忙，请稍后再试' },
         { status: 500 }
       );
     }

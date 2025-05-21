@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       .order('updated_at', { ascending: false });
       
     if (recordsError) {
-      return NextResponse.json({ error: 'Failed to fetch records' }, { status: 500 });
+      return NextResponse.json({ error: '系统繁忙，请稍后再试' }, { status: 500 });
     }
 
 

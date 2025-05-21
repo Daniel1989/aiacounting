@@ -347,7 +347,7 @@ export default function SummarySection({ userId, locale, month }: SummarySection
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch AI tips');
+        throw new Error('系统繁忙，请稍后再试');
       }
       
       const data = await response.json();

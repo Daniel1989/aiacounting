@@ -14,7 +14,7 @@ export default function TermsPage() {
       
       <div className="prose prose-gray max-w-none">
         <p className="mb-6">
-          欢迎您（即「用户」）使用我们提供的产品服务，开发商 Xiaopeng Cao（以下简称"我们"）合法拥有开发/运营标注名称为抠搜记账的客户端应用程序、官方网站以及供第三方网站和应用程序使用的软件开发工具包（SDK）和应用程序编程接口（API）。
+          欢迎您（即「用户」）使用我们提供的产品服务，开发商 曹肖鹏（以下简称"我们"）合法拥有开发/运营标注名称为抠搜记账的客户端应用程序、官方网站以及供第三方网站和应用程序使用的软件开发工具包（SDK）和应用程序编程接口（API）。
         </p>
 
         <p className="mb-6">

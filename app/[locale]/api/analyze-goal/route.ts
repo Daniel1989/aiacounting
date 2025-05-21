@@ -28,7 +28,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { locale, type, targetAmount, monthlyIncome, description, useStream, context } = await request.json();
+    const { locale, type, targetAmount, monthlyIncome, useStream, context } = await request.json();
+    const description = '存钱以备不时之需'
     // Get last 90 days of records
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       .order('updated_at', { ascending: false });
       
     if (recordsError) {
-      return NextResponse.json({ error: 'Failed to fetch records' }, { status: 500 });
+      return NextResponse.json({ error: '系统繁忙，请稍后再试' }, { status: 500 });
     }
 
 
@@ -111,7 +112,7 @@ Please use following steps to create a structured financial plan:
 4. Based on the daily savings, calculate a recommended maximum daily expense (dailyMaxExpense) the user should maintain to stay on track.
 5. Based on the time needed, create a structured financial plan.
 
-Please organize this information into a structured JSON format with the following structure:
+Please organize this information into a structured JSON format with the following structure, don't include any explaination:
 {
   "totalCost": number,
   "dailySavings": number,
@@ -213,14 +214,23 @@ Respond in **${language}**.
         messages: [{ role: "user", content: prompt }],
         model: model!,
         response_format: { type: "json_object" },
+        max_tokens: 10000,
       });
-      console.log('return openai response successfully');
+      console.log('prompt', prompt)
+      console.log('return openai response successfully', completion.choices[0].message);
       const content = completion.choices[0].message.content;
       if (!content) {
         throw new Error('No content in OpenAI response');
       }
-      
-      const analysis = JSON.parse(content);
+      let analysis;
+      try {
+        analysis = JSON.parse(content);
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        const matches = [...content.matchAll(/\{([^{}]+)\}/g)];
+        const result = matches.map(m => m[1]);
+        analysis = JSON.parse('{' + result[0] + '}');
+      }
       
       // Store the analysis result
       const { error: analysisError } = await supabase
