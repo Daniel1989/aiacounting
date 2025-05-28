@@ -15,7 +15,9 @@ const publicPaths = ['/login', '/auth/callback', '/terms', '/privacy'];
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  
+  if(pathname.includes('googledbc7bada3b49d51f.html')) {
+    return NextResponse.next();
+  }
   // First, handle internationalization
   const response = intlMiddleware(request);
   
