@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
 import { locales } from './config';
-import { updateSession } from '@/app/lib/supabase/middleware'
+import { updateSession } from '@/app/lib/supabase/middleware';
+
+// Create the next-intl middleware
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale: 'zh',
+  localePrefix: 'always'
+});
 
 // Define public paths that don't require authentication
 const publicPaths = ['/login', '/auth/callback', '/terms', '/privacy'];
@@ -8,25 +16,17 @@ const publicPaths = ['/login', '/auth/callback', '/terms', '/privacy'];
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
-  // Check if the pathname starts with a locale
-  const pathnameHasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
+  // First, handle internationalization
+  const response = intlMiddleware(request);
   
-  // If the pathname doesn't have a locale, redirect to the default locale
-  if (!pathnameHasLocale) {
-    // Get the locale from the Accept-Language header or use 'zh' as default
-    const acceptLanguage = request.headers.get('accept-language') || '';
-    const preferredLocale = acceptLanguage.includes('zh-CN') ? 'zh' : 'en';
-    
-    // Create the URL with the preferred locale
-    const url = new URL(`/${preferredLocale}${pathname}`, request.url);
-    url.search = request.nextUrl.search;
-    return NextResponse.redirect(url);
+  // If intl middleware returned a redirect, return it
+  if (response && response.status === 307) {
+    return response;
   }
   
   // Get the locale from the pathname
   const locale = pathname.split('/')[1];
+  
   // Check if the path is public (login, auth callback, etc.)
   const isPublicPath = publicPaths.some(path => pathname.includes(`/${locale}${path}`));
   
@@ -35,9 +35,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // User is logged in, allow access
-  return await updateSession(request)
-
+  // Handle authentication
+  return await updateSession(request);
 }
 
 // Only run the middleware on these paths

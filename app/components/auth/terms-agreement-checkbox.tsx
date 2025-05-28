@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 
 interface TermsAgreementCheckboxProps {
   locale: string;
-  searchParams: { [key: string]: string };
+  searchParams: { redirectTo?: string };
 }
 
 export function TermsAgreementCheckbox({ locale, searchParams }: TermsAgreementCheckboxProps) {

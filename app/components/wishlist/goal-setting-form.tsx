@@ -905,7 +905,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
         toast.success(t('goalCreated'));
       }
 
-      router.push(`/${locale}/wishlist2`);
+      router.push(`/${locale}/wishlist`);
     } catch (error) {
       console.error('Error saving goal:', error);
       toast.error(existingGoal ? t('errorUpdatingGoal') : t('errorCreatingGoal'));
@@ -927,7 +927,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
               : t('analyzingDescription')}
           </div>
 
-          {/* {streamedResponse && (
+          {streamedResponse && (
             <div className="streaming-container">
               <div className="stream-title">
                 <span>{t('rawResponse')}</span>
@@ -949,7 +949,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 </ReactMarkdown>
               </div>
             </div>
-          )} */}
+          )}
         </LoadingContainer>
       </Container>
     );
@@ -1003,7 +1003,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           )}
 
           {/* Display raw LLM response at the bottom */}
-          {/* {analysis.rawLlmOutput && (
+          {analysis.rawLlmOutput && (
             <div className="section">
               <div className="title">{t('rawAnalysis')}</div>
               <div className="content raw-response">
@@ -1014,7 +1014,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
                 </ReactMarkdown>
               </div>
             </div>
-          )} */}
+          )}
         </AnalysisResult>
 
         <ActionButtons>
@@ -1073,7 +1073,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
           />
         </FormGroup>
 
-        {/* <FormGroup>
+        <FormGroup>
           <div className="label">{t('goalDescription')}</div>
           <textarea
             name="description"
@@ -1082,7 +1082,7 @@ export default function GoalSettingForm({ userId, locale, type, existingGoal }: 
             value={formData.description}
             onChange={handleChange}
           />
-        </FormGroup> */}
+        </FormGroup>
 
         <SubmitButton
           type="submit"

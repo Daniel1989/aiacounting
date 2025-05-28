@@ -58,15 +58,15 @@ export default async function GoalSettingPage(props: any) {
   if (type === 'shopping' || type === 'savings') {
     const currentUser = await getCurrentUser();
     
-    let hasActivatedInviteCode = false;
-    if (currentUser && currentUser.auth_id) {
-      hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
-    }
+    // let hasActivatedInviteCode = false;
+    // if (currentUser && currentUser.auth_id) {
+    //   hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
+    // }
     
-    // Redirect to wishlist page if premium feature not activated
-    if (!hasActivatedInviteCode) {
-      redirect(`/${locale}/wishlist`);
-    }
+    // // Redirect to wishlist page if premium feature not activated
+    // if (!hasActivatedInviteCode) {
+    //   redirect(`/${locale}/wishlist`);
+    // }
   }
   
   let existingGoal = null;
@@ -85,14 +85,14 @@ export default async function GoalSettingPage(props: any) {
     if ((existingGoal?.type === 'shopping' || existingGoal?.type === 'savings')) {
       const currentUser = await getCurrentUser();
       
-      let hasActivatedInviteCode = false;
-      if (currentUser && currentUser.auth_id) {
-        hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
-      }
+      // let hasActivatedInviteCode = false;
+      // if (currentUser && currentUser.auth_id) {
+      //   hasActivatedInviteCode = await hasUserUsedInviteCode(currentUser.auth_id);
+      // }
       
-      if (!hasActivatedInviteCode) {
-        redirect(`/${locale}/wishlist`);
-      }
+      // if (!hasActivatedInviteCode) {
+      //   redirect(`/${locale}/wishlist`);
+      // }
     }
   }
   

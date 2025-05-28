@@ -54,8 +54,8 @@ export function Nav({ locale }: NavProps) {
     { href: `/${locale}`, icon: Home, label: t('today') },
     { href: `/${locale}/records/new`, icon: PiggyBank, label: t('addRecord') },
     { href: `/${locale}/statistics`, icon: BarChart, label: t('statistics') },
-    { href: `/${locale}/wishlist2`, icon: Heart, label: t('wishlist') },
-    { href: `/${locale}/settings`, icon: Settings, label: t('settings') }
+    { href: `/${locale}/wishlist`, icon: Heart, label: t('wishlist') },
+    // { href: `/${locale}/settings`, icon: Settings, label: t('settings') }
   ];
 
   if(pathname.includes('privacy') || pathname.includes("terms")) {

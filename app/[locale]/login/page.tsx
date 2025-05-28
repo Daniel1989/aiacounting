@@ -4,18 +4,41 @@ import { LanguageSwitcher } from '@/app/components/language-switcher';
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { TermsAgreementCheckbox } from '@/app/components/auth/terms-agreement-checkbox';
+import { Metadata } from 'next';
 
 interface LoginPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: { redirectTo?: string };
+  searchParams: Promise<{ redirectTo?: string }>;
+}
+
+export async function generateMetadata({ params }: LoginPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  
+  return {
+    title: locale === 'zh' ? '登录 - AI智能记账' : 'Login - AI Accounting',
+    description: locale === 'zh' 
+      ? '登录AI智能记账应用，开始管理您的财务。支持邮箱注册登录，安全可靠。'
+      : 'Login to AI Accounting app and start managing your finances. Secure email registration and login.',
+    robots: {
+      index: false,
+      follow: true,
+    },
+    openGraph: {
+      title: locale === 'zh' ? '登录 - AI智能记账' : 'Login - AI Accounting',
+      description: locale === 'zh' 
+        ? '登录AI智能记账应用，开始管理您的财务'
+        : 'Login to AI Accounting app and start managing your finances',
+    },
+  };
 }
 
 export default async function LoginPage({ 
   params, 
   searchParams 
-}: any) {
-  // In Next.js 15, we need to await the params
+}: LoginPageProps) {
+  // In Next.js 15, we need to await both params and searchParams
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   
   unstable_setRequestLocale(locale);
   
@@ -37,7 +60,7 @@ export default async function LoginPage({
           <LoginForm />
           
           <div className="mt-6 text-center">
-            <TermsAgreementCheckbox locale={locale} searchParams={searchParams} />
+            <TermsAgreementCheckbox locale={locale} searchParams={resolvedSearchParams} />
           </div>
         </div>
       </div>

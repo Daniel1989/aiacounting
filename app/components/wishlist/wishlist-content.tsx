@@ -281,7 +281,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
   const [isLoading, setIsLoading] = useState(true);
   const [actualSpending, setActualSpending] = useState<number>(0);
   const [todaySpending, setTodaySpending] = useState<number>(0);
-  
+
   useEffect(() => {
     const fetchActiveGoal = async () => {
       try {
@@ -294,14 +294,14 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
-        
+
         if (error) {
           if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
             console.error('Error fetching active goal:', error);
           }
         } else if (data) {
           setActiveGoal(data);
-          
+
           // If we have an active goal, fetch the spending since it was created
           if (data.created_at) {
             // Get total spending since goal creation
@@ -312,7 +312,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               .eq('category', 'cost')
               .gte('created_at', data.created_at)
               .order('created_at', { ascending: false });
-            
+
             if (spendingError) {
               console.error('Error fetching spending:', spendingError);
             } else if (spendingData) {
@@ -320,11 +320,11 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               const totalSpending = spendingData.reduce((sum, record) => sum + record.amount, 0);
               setActualSpending(totalSpending);
             }
-            
+
             // Get today's spending
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             const { data: todayData, error: todayError } = await supabase
               .from('records')
               .select('amount')
@@ -332,7 +332,7 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               .eq('category', 'cost')
               .gte('created_at', today.toISOString())
               .order('created_at', { ascending: false });
-            
+
             if (todayError) {
               console.error('Error fetching today spending:', todayError);
             } else if (todayData) {
@@ -348,109 +348,109 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
         setIsLoading(false);
       }
     };
-    
+
     fetchActiveGoal();
   }, [userId]);
-  
+
   const handleSelectGoal = (type: string) => {
     // For shopping and savings, check if user has activated an invite code
     // if ((type === 'shopping' || type === 'savings') && !hasActivatedInviteCode) {
     //   // Don't navigate if premium feature is locked
     //   return;
     // }
-    
+
     // If user has an active goal, show it instead of creating a new one
     if (activeGoal) {
-      router.push(`/${locale}/wishlist2`);
+      router.push(`/${locale}/wishlist`);
     } else {
-      router.push(`/${locale}/wishlist2/${type}`);
+      router.push(`/${locale}/wishlist/${type}`);
     }
   };
-  
+
   const handleAbandonPlan = async () => {
     if (!activeGoal) return;
-    
+
     try {
       const supabase = createClient();
       const { error } = await supabase
         .from('goals')
         .update({ status: 'cancelled' })
         .eq('id', activeGoal.id);
-      
+
       if (error) throw error;
-      
+
       setActiveGoal(null);
     } catch (error) {
       console.error('Error abandoning plan:', error);
     }
   };
-  
+
   // Calculate progress percentage based on daily max expense and days passed
   const calculateProgress = () => {
     if (!activeGoal || !activeGoal.target_amount || !activeGoal.daily_max_expense) return 0;
-    
+
     // Calculate days passed since the goal was created
     const startDate = new Date(activeGoal.created_at);
     const currentDate = new Date();
     const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // Calculate theoretical saved amount: daily max expense * days passed
     const theoreticalSaved = activeGoal.daily_max_expense * daysPassed;
-    
+
     // Calculate actual saved: theoretical saved - actual spending
     const actualSaved = theoreticalSaved - actualSpending;
-    
+
     // Calculate progress as percentage of target amount
     const progressPercentage = (actualSaved / activeGoal.target_amount) * 100;
-    
+
     // Ensure progress doesn't exceed 100%
     return Math.min(Math.max(progressPercentage, 0), 100);
   };
-  
+
   // Calculate daily metrics for display
   const calculateDailyMetrics = () => {
     if (!activeGoal) return { recommendedExpense: 0, todayExpense: 0, savings: 0 };
-    
+
     // Use the daily max expense as the recommended expense
     const recommendedExpense = activeGoal.daily_max_expense;
-    
+
     // Use actual today's spending from the database
     const todayExpense = todaySpending;
-    
+
     // Calculate savings (positive if under budget, negative if over)
     const savings = recommendedExpense - todayExpense;
-    
+
     return { recommendedExpense, todayExpense, savings };
   };
-  
+
   // Calculate estimated completion date
   const calculateCompletionDate = () => {
     if (!activeGoal || !activeGoal.target_amount || !activeGoal.daily_savings) {
       return null;
     }
-    
+
     // Calculate days since goal creation
     const startDate = new Date(activeGoal.created_at);
     const currentDate = new Date();
     const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // Calculate progress as amount saved
     const progress = calculateProgress();
     const savedAmount = (activeGoal.target_amount * progress) / 100;
-    
+
     // Calculate remaining amount
     const remainingAmount = activeGoal.target_amount - savedAmount;
-    
+
     // Calculate days needed to save remaining amount
     const daysRemaining = Math.ceil(remainingAmount / activeGoal.daily_savings);
-    
+
     // Calculate estimated completion date
     const completionDate = new Date(currentDate);
     completionDate.setDate(completionDate.getDate() + daysRemaining);
-    
+
     return completionDate;
   };
-  
+
   if (isLoading) {
     return (
       <Container>
@@ -460,23 +460,23 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
       </Container>
     );
   }
-  
+
   if (activeGoal) {
     const progress = calculateProgress();
     const targetAmount = activeGoal.target_amount || 0;
     const progressAmount = (targetAmount * progress) / 100;
     const { recommendedExpense, todayExpense, savings } = calculateDailyMetrics();
     const completionDate = calculateCompletionDate();
-    
+
     return (
       <Container>
         {/* <Header>
           <div className="title">{t('planStatus')}</div>
         </Header> */}
-        
+
         <PlanStatusContainer>
           <PlanHeader>{t('planProgress')}</PlanHeader>
-          
+
           <PlanSection>
             <div className="title">{t('targetProgress')}</div>
             <div className="amount">¥{targetAmount.toLocaleString()}</div>
@@ -490,19 +490,19 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               </div>
             )}
           </PlanSection>
-          
+
           <PlanSection>
             <div className="title">{t('monthStatus')}</div>
             <div className="status-item">
               <CheckCircle2 size={16} className="icon" />
               <div className="text">
-                {savings >= 0 
-                  ? `${t('aheadOfPlan')} ${Math.floor(savings / activeGoal.daily_savings)} ${t('days')}` 
+                {savings >= 0
+                  ? `${t('aheadOfPlan')} ${Math.floor(savings / activeGoal.daily_savings)} ${t('days')}`
                   : `${t('behindPlan')} ${Math.ceil(Math.abs(savings) / activeGoal.daily_savings)} ${t('days')}`}
               </div>
             </div>
           </PlanSection>
-          
+
           <PlanSection>
             <div className="title">{t('dailyRecords')}</div>
             <div className="record">
@@ -521,9 +521,9 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
             </div>
           </PlanSection>
         </PlanStatusContainer>
-        
+
         <ActionButtons>
-          <button className="secondary" onClick={() => router.push(`/${locale}/wishlist2/${activeGoal.type}?edit=${activeGoal.id}`)}>
+          <button className="secondary" onClick={() => router.push(`/${locale}/wishlist/${activeGoal.type}?edit=${activeGoal.id}`)}>
             {t('adjustPlan')}
           </button>
           <button className="primary" onClick={handleAbandonPlan}>
@@ -533,16 +533,16 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
       </Container>
     );
   }
-  
+
   return (
     <Container>
       <Header>
         <div className="title">{t('title')}</div>
         <div className="subtitle">{t('subtitle')}</div>
       </Header>
-      
+
       <GoalList>
-      <GoalCardWrapper>
+        {/* <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('savings')}>
             <div className="icon-container savings">
               <PiggyBank size={24} />
@@ -552,8 +552,8 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="description">{t('saving.description')}</div>
             </div>
           </GoalCard>
-        </GoalCardWrapper>
-        {/* <GoalCardWrapper>
+        </GoalCardWrapper> */}
+        <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('travel')}>
             <div className="icon-container travel">
               <Plane size={24} />
@@ -563,9 +563,9 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="description">{t('travel.description')}</div>
             </div>
           </GoalCard>
-        </GoalCardWrapper> */}
-        
-        {/* <GoalCardWrapper>
+        </GoalCardWrapper>
+
+        <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('shopping')}>
             <div className="icon-container shopping">
               <ShoppingBag size={24} />
@@ -575,14 +575,14 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="description">{t('shopping.description')}</div>
             </div>
           </GoalCard>
-          {!hasActivatedInviteCode && (
+          {/* {!hasActivatedInviteCode && (
             <LockedOverlay>
               <Lock className="lock-icon" size={24} />
               <div className="lock-text">{t('premiumFeature')}</div>
             </LockedOverlay>
-          )}
+          )} */}
         </GoalCardWrapper>
-        
+
         <GoalCardWrapper>
           <GoalCard onClick={() => handleSelectGoal('savings')}>
             <div className="icon-container savings">
@@ -593,13 +593,13 @@ export default function WishlistContent({ userId, locale, hasActivatedInviteCode
               <div className="description">{t('saving.description')}</div>
             </div>
           </GoalCard>
-          {!hasActivatedInviteCode && (
+          {/* {!hasActivatedInviteCode && (
             <LockedOverlay>
               <Lock className="lock-icon" size={24} />
               <div className="lock-text">{t('premiumFeature')}</div>
             </LockedOverlay>
-          )}
-        </GoalCardWrapper> */}
+          )} */}
+        </GoalCardWrapper>
       </GoalList>
     </Container>
   );

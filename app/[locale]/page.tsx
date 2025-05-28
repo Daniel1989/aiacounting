@@ -1,9 +1,39 @@
 import { unstable_setRequestLocale, getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/app/lib/server';
 import { HomeContent } from '@/app/components/home/home-content';
+import { Metadata } from 'next';
 
 interface HomePageProps {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: HomePageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations('home');
+  
+  return {
+    title: locale === 'zh' ? 'AI智能记账 - 免费移动记账应用' : 'AI Accounting - Free Smart Mobile Accounting App',
+    description: locale === 'zh' 
+      ? '免费AI智能记账应用，轻松管理个人和企业财务。自动分类、智能报表、多语言支持。适合小企业和个人理财。'
+      : 'Free AI-powered accounting app for personal and business finance management. Automated categorization, smart reports, multi-language support. Perfect for small businesses and personal finance.',
+    keywords: locale === 'zh'
+      ? ['AI记账', '智能记账', '免费记账软件', '移动记账', '财务管理', '个人理财', '小企业记账', '自动记账']
+      : ['AI accounting', 'smart bookkeeping', 'free accounting app', 'mobile finance', 'expense tracking', 'personal finance', 'small business accounting'],
+    openGraph: {
+      title: locale === 'zh' ? 'AI智能记账 - 免费移动记账应用' : 'AI Accounting - Free Smart Mobile Accounting App',
+      description: locale === 'zh' 
+        ? '免费AI智能记账应用，轻松管理个人和企业财务'
+        : 'Free AI-powered accounting app for personal and business finance management',
+      locale: locale === 'zh' ? 'zh_CN' : 'en_US',
+    },
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        'en': '/en',
+        'zh': '/zh',
+      },
+    },
+  };
 }
 
 export default async function HomePage({ params }: HomePageProps) {

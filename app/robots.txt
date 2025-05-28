@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://aiacounting.app/sitemap.xml
+
+# Crawl-delay for better server performance
+Crawl-delay: 1
+
+# Block access to admin and private areas
+Disallow: /api/
+Disallow: /auth/
+Disallow: /_next/
+Disallow: /admin/
+
+# Allow important pages
+Allow: /en/
+Allow: /zh/
+Allow: /en/login
+Allow: /zh/login 
