@@ -2,14 +2,12 @@ import { MetadataRoute } from 'next'
 import { locales, type Locale } from '../config'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://aiacounting.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://free-accounting.vercel.app'
   
   // Generate URLs for each locale
   const routes = [
     '',
     '/login',
-    '/terms',
-    '/privacy',
   ]
   
   const sitemap: MetadataRoute.Sitemap = []
