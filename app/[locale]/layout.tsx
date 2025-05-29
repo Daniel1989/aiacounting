@@ -8,6 +8,7 @@ import { Toaster } from 'sonner';
 import { Suspense } from 'react';
 import { AndroidWebViewProvider } from '@/app/components/android-webview-provider';
 import { StructuredData } from '@/app/components/seo/structured-data';
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: {
@@ -141,6 +142,7 @@ export default async function RootLayout({
             <div className="flex flex-col min-h-screen">
               <main className="flex-grow pb-16">
                 {children}
+                <Analytics />
               </main>
               <Suspense>
                 <Nav locale={locale} />
